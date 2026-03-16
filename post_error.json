@@ -1,0 +1,1 @@
+{"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"One or more validation errors occurred.","status":400,"errors":{"image":["The image field is required."]},"traceId":"00-af05512d1392125cf03399fa52d70939-e95883cc2fd12232-00"}
