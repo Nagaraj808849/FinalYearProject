@@ -1,0 +1,26 @@
+[
+  {
+    "id": "ORD1773382910709",
+    "userEmail": "guest@example.com",
+    "items": "Nagaraj x1",
+    "totalAmount": 1500,
+    "orderDate": "3/13/2026",
+    "status": "Pending"
+  },
+  {
+    "id": "ORD1773382999475",
+    "userEmail": "guest@example.com",
+    "items": "XYZ x1",
+    "totalAmount": 1200,
+    "orderDate": "3/13/2026",
+    "status": "Pending"
+  },
+  {
+    "id": "ORD1773383129295",
+    "userEmail": "nagaraj@gmail.com",
+    "items": "Nagaraj x1, XYZ x1, Manobad x1",
+    "totalAmount": 3184,
+    "orderDate": "3/13/2026",
+    "status": "Pending"
+  }
+]
