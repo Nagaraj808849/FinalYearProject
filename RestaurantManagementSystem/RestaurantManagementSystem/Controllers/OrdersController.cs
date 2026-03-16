@@ -1,0 +1,116 @@
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using RestaurantManagementSystem.DataLayer;
+using System.Data;
+
+namespace RestaurantManagementSystem.Controllers
+{
+    [Authorize]
+    [ApiController]
+    [Route("api/[controller]")]
+    public class OrdersController : ControllerBase
+    {
+        private readonly SqlServerDB _db;
+
+        public OrdersController()
+        {
+            _db = new SqlServerDB();
+            
+            // Auto-create table if not exists
+            try
+            {
+                _db.ExecuteOnlyQuery(@"
+                    IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='UserOrders' and xtype='U')
+                    CREATE TABLE UserOrders (
+                        Id NVARCHAR(50) PRIMARY KEY,
+                        UserEmail NVARCHAR(100),
+                        Items NVARCHAR(MAX),
+                        TotalAmount DECIMAL(18,2),
+                        OrderDate NVARCHAR(50),
+                        Status NVARCHAR(50)
+                    )");
+            } catch { } // Ignore if already created
+        }
+
+        [HttpPost("CreateOrder")]
+        public IActionResult CreateOrder([FromBody] UserOrder order)
+        {
+            string query = $@"
+                INSERT INTO UserOrders (Id, UserEmail, Items, TotalAmount, OrderDate, Status)
+                VALUES ('{order.Id}', '{order.UserEmail}', '{order.Items}', {order.TotalAmount}, '{order.OrderDate}', 'Pending')";
+            
+            int result = _db.ExecuteOnlyQuery(query);
+            return Ok(new { message = "Order Created" });
+        }
+
+        [HttpGet("GetOrders/{email}")]
+        public IActionResult GetOrders(string email)
+        {
+            string query = $"SELECT * FROM UserOrders WHERE UserEmail = '{email}' ORDER BY OrderDate DESC";
+            DataTable dt = _db.GetDataTable(query);
+
+            var orders = new List<UserOrder>();
+            foreach (DataRow row in dt.Rows)
+            {
+                orders.Add(new UserOrder
+                {
+                    Id = row["Id"].ToString(),
+                    UserEmail = row["UserEmail"].ToString(),
+                    Items = row["Items"].ToString(),
+                    TotalAmount = Convert.ToDecimal(row["TotalAmount"]),
+                    OrderDate = row["OrderDate"].ToString(),
+                    Status = row["Status"].ToString()
+                });
+            }
+            return Ok(orders);
+        }
+
+        [Authorize(Roles = "1")]
+        [HttpGet("GetAllOrders")]
+        public IActionResult GetAllOrders()
+        {
+            string query = "SELECT * FROM UserOrders ORDER BY OrderDate DESC";
+            DataTable dt = _db.GetDataTable(query);
+
+            var orders = new List<UserOrder>();
+            foreach (DataRow row in dt.Rows)
+            {
+                orders.Add(new UserOrder
+                {
+                    Id = row["Id"].ToString(),
+                    UserEmail = row["UserEmail"].ToString(),
+                    Items = row["Items"].ToString(),
+                    TotalAmount = Convert.ToDecimal(row["TotalAmount"]),
+                    OrderDate = row["OrderDate"].ToString(),
+                    Status = row["Status"].ToString()
+                });
+            }
+            return Ok(orders);
+        }
+        
+        [Authorize(Roles = "1")]
+        [HttpPut("UpdateStatus")]
+        public IActionResult UpdateStatus([FromBody] OrderStatusUpdate update)
+        {
+            string query = $"UPDATE UserOrders SET Status = '{update.Status}' WHERE Id = '{update.Id}'";
+            _db.ExecuteOnlyQuery(query);
+            return Ok(new { message = "Status Updated" });
+        }
+    }
+
+    public class UserOrder
+    {
+        public string Id { get; set; }
+        public string UserEmail { get; set; }
+        public string Items { get; set; }
+        public decimal TotalAmount { get; set; }
+        public string OrderDate { get; set; }
+        public string Status { get; set; }
+    }
+
+    public class OrderStatusUpdate
+    {
+        public string Id { get; set; }
+        public string Status { get; set; }
+    }
+}
