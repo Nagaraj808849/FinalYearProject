@@ -19,7 +19,7 @@ export default function MenuPage() {
   useEffect(() => {
     const fetchMenu = async () => {
       try {
-        const response = await axios.get("http://localhost:5155/api/Menu");
+        const response = await axios.get("https://localhost:7080/api/Menu");
 
         const categoryMap = {
           1: "Starters",

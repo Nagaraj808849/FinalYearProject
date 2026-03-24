@@ -40,12 +40,12 @@ export default function UserDash() {
   const fetchOrders = async () => {
     if (!profile.email) return;
     try {
-      const resp = await axios.get(`http://localhost:5155/api/Orders/GetOrders/${profile.email}`);
+      const resp = await axios.get(`https://localhost:7080/api/Orders/GetOrders/${profile.email}`);
       const orders = resp.data;
       setMyOrders(orders);
       
-      const total = orders.reduce((sum, order) => sum + (order.totalAmount || 0), 0);
-      setTotalExpense(total);
+      const expenseResp = await axios.get(`https://localhost:7080/api/Orders/GetTotalExpense/${profile.email}`);
+      setTotalExpense(expenseResp.data.totalExpense);
     } catch (err) {
       console.error("Failed to load orders", err);
     }

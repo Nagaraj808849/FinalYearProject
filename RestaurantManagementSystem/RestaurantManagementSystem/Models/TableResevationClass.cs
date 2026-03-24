@@ -1,8 +1,10 @@
-﻿namespace RestaurantManagementSystem.Models
+namespace RestaurantManagementSystem.Models
 {
     public class TableResevationClass
     {
         public int ReservationId { get; set; }
+
+        public int? UserId { get; set; }
 
         public string UserName { get; set; }
 

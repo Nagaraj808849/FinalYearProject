@@ -3,9 +3,11 @@ import axios from "axios";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
+import { useAuth } from "../src/context/useAuth"; // Add useAuth import
 
 const TableOrder = () => {
   const navigate = useNavigate();
+  const { user } = useAuth(); // Extract user from AuthContext
 
   const { register, handleSubmit, reset } = useForm();
 
@@ -25,15 +27,16 @@ const TableOrder = () => {
       const reservationData = {
         UserName: data.username,
         UserEmail: data.email,
-        ReservationDateTime: data.dateTime,   // ✅ Correct field name
+        ReservationDateTime: data.dateTime,
         NoOfPeople: Number(data.noOfPeople),
-        SpecialAttentions: data.specialAttention
+        SpecialAttentions: data.specialAttention,
+        UserId: user ? user.userId : null // Add UserId to payload
       };
 
       console.log("Sending Data:", reservationData);
 
       const response = await axios.post(
-        "http://localhost:5155/api/TableReservation/BookTable",
+        "https://localhost:7080/api/TableReservation/BookTable",
         reservationData
       );
 

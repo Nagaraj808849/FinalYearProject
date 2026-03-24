@@ -10,7 +10,7 @@ const Signup = () => {
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
-    emailId: "",        // ✅ lowercase (important)
+    emailId: "",        
     password: "",
     confirmPassword: "",
   });
@@ -49,7 +49,7 @@ const Signup = () => {
 
     try {
       const response = await axios.post(
-        "http://localhost:5155/api/Registration/InsertRegisters",
+        "https://localhost:7080/api/Registration/InsertRegisters",
 
         {
           "firstName": formData.firstName,

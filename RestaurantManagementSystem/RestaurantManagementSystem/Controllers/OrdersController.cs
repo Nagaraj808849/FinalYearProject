@@ -96,6 +96,20 @@ namespace RestaurantManagementSystem.Controllers
             _db.ExecuteOnlyQuery(query);
             return Ok(new { message = "Status Updated" });
         }
+
+        [HttpGet("GetTotalExpense/{email}")]
+        public IActionResult GetTotalExpense(string email)
+        {
+            string query = $"SELECT SUM(TotalAmount) as Total FROM UserOrders WHERE UserEmail = '{email}'";
+            DataTable dt = _db.GetDataTable(query);
+
+            decimal total = 0;
+            if (dt.Rows.Count > 0 && dt.Rows[0]["Total"] != DBNull.Value)
+            {
+                total = Convert.ToDecimal(dt.Rows[0]["Total"]);
+            }
+            return Ok(new { totalExpense = total });
+        }
     }
 
     public class UserOrder

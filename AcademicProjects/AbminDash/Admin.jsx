@@ -36,7 +36,7 @@ export default function Admin() {
 
   const fetchMenu = async () => {
     try {
-      const response = await axios.get("http://localhost:5155/api/Menu");
+      const response = await axios.get("https://localhost:7080/api/Menu");
       setMenu(response.data);
     } catch (err) {
       console.error("Failed to fetch menu:", err);
@@ -45,7 +45,7 @@ export default function Admin() {
 
   const fetchOrders = async () => {
     try {
-      const response = await axios.get("http://localhost:5155/api/Orders/GetAllOrders");
+      const response = await axios.get("https://localhost:7080/api/Orders/GetAllOrders");
       setOrders(response.data);
     } catch (err) {
       console.error("Failed to fetch orders:", err);
@@ -54,7 +54,7 @@ export default function Admin() {
 
   const fetchReservations = async () => {
     try {
-      const response = await axios.get("http://localhost:5155/api/TableReservation/GetAllReservations");
+      const response = await axios.get("https://localhost:7080/api/TableReservation/GetAllReservations");
       setReservations(response.data);
     } catch (err) {
       console.error("Failed to fetch reservations:", err);
@@ -69,7 +69,7 @@ export default function Admin() {
 
   const fetchUsers = async () => {
     try {
-      const response = await axios.get("http://localhost:5155/api/Registration/GetRegisters");
+      const response = await axios.get("https://localhost:7080/api/Registration/GetRegisters");
       
       const mappedUsers = response.data.map((u) => ({
         id: u.userId,
@@ -116,7 +116,7 @@ export default function Admin() {
   const removeUser = async (userId) => {
     if (!confirm(`Remove user? This cannot be undone.`)) return;
     try {
-      await axios.delete(`http://localhost:5155/api/Registration/DeleteRegister/${userId}`);
+      await axios.delete(`https://localhost:7080/api/Registration/DeleteRegister/${userId}`);
       fetchUsers();
     } catch (err) {
       console.error(err);
@@ -126,7 +126,7 @@ export default function Admin() {
 
   const updateOrderStatus = async (orderId, newStatus) => {
     try {
-      await axios.put("http://localhost:5155/api/Orders/UpdateStatus", {
+      await axios.put("https://localhost:7080/api/Orders/UpdateStatus", {
         Id: orderId,
         Status: newStatus
       });
@@ -171,7 +171,7 @@ export default function Admin() {
         image: newMenuData.image,
         is_available: newMenuData.is_available
       };
-      const response = await axios.post("http://localhost:5155/api/Menu/AddMenuItem", payload, {
+      const response = await axios.post("https://localhost:7080/api/Menu/AddMenuItem", payload, {
         headers: { "Content-Type": "application/json" }
       });
       setMenuMessage({ text: "Menu item created successfully!", type: "success" });
@@ -465,7 +465,7 @@ export default function Admin() {
                                 onClick={async () => {
                                   if (confirm(`Delete ${item.item_name}?`)) {
                                     try {
-                                      await axios.delete(`http://localhost:5155/api/Menu/DeleteMenuItem/${item.menu_id}`);
+                                      await axios.delete(`https://localhost:7080/api/Menu/DeleteMenuItem/${item.menu_id}`);
                                       fetchMenu();
                                     } catch (err) {
                                       console.error(err);
@@ -573,6 +573,19 @@ export default function Admin() {
                 <p className="text-sm sm:text-base text-amber-700">Manage all table bookings</p>
               </div>
 
+              <div className="bg-white rounded-xl shadow-lg border border-amber-200 p-6 flex items-center justify-between mb-6">
+                <div>
+                  <h3 className="text-lg font-bold text-amber-900">Current Reservations</h3>
+                  <p className="text-gray-500 text-sm">Real-time table bookings from the database.</p>
+                </div>
+                <button
+                  onClick={fetchReservations}
+                  className="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white px-6 py-3 rounded-lg font-semibold transition shadow-lg text-sm sm:text-base whitespace-nowrap"
+                >
+                  🔄 Refresh
+                </button>
+              </div>
+
               <div className="bg-white rounded-xl shadow-lg border border-amber-200">
                 {reservations.length === 0 ? (
                   <div className="text-center py-12">
@@ -614,9 +627,22 @@ export default function Admin() {
 
           {view === "Orders" && (
             <>
-              <div className="mb-6 sm:mb-8">
+              <div className="mb-6 sm:mb-8 text-left">
                 <h2 className="text-2xl sm:text-4xl font-bold text-amber-900 mb-1 sm:mb-2">Orders Management</h2>
                 <p className="text-sm sm:text-base text-amber-700">Manage all customer orders</p>
+              </div>
+
+              <div className="bg-white rounded-xl shadow-lg border border-amber-200 p-6 flex items-center justify-between mb-6">
+                <div>
+                  <h3 className="text-lg font-bold text-amber-900">Current Orders</h3>
+                  <p className="text-gray-500 text-sm">Real-time customer orders from the database.</p>
+                </div>
+                <button
+                  onClick={fetchOrders}
+                  className="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white px-6 py-3 rounded-lg font-semibold transition shadow-lg text-sm sm:text-base whitespace-nowrap"
+                >
+                  🔄 Refresh
+                </button>
               </div>
 
               <div className="bg-white rounded-xl shadow-lg overflow-hidden border border-amber-200">

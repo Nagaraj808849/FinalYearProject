@@ -79,8 +79,8 @@ export default function HomePage1() {
         <div className="absolute inset-0 bg-black/50"></div>
         {/* inline navbar for this page */}
         <nav className="absolute top-0 left-0 w-full z-50 bg-gradient-to-r from-amber-50 via-amber-100 to-white backdrop-blur-md border-b border-amber-500/50 shadow-lg">
-            <div className="flex justify-between items-center">
-              <h1 className="text-xl sm:text-2xl font-bold text-amber-900 drop-shadow-lg">🍴 Golden Essence</h1>
+            <div className="flex justify-between items-center px-6 py-5 md:px-10 md:py-6">
+              <h1 className="text-2xl sm:text-3xl font-bold text-amber-900 drop-shadow-lg">🍴 Golden Essence</h1>
               
               {/* Desktop Menu */}
               <div className="hidden md:flex items-center gap-8">
@@ -394,7 +394,7 @@ export default function HomePage1() {
               <a href="#" className="hover:text-amber-400 transition">Sitemap</a>
             </div>
           </div>
-        </div>7
+        </div>
       </footer>
     </div>
   );

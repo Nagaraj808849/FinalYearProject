@@ -37,51 +37,49 @@ const Login = () => {
 
     try {
       const response = await axios.post(
-        "http://localhost:5155/api/Login/Login",
+        "https://localhost:7080/api/Login/Login", // ✅ FIXED (HTTPS)
         loginData,
         {
           headers: {
             "Content-Type": "application/json",
-          },
+          }
         }
       );
 
       const data = response.data;
 
-      // Normalize role to number: 'Admin'/1 → 1, 'User'/'0'/'2' → 2
-      // Role 0 = new user with no role set in DB, treat as Customer
+      // Normalize role
       const normalizeRole = (raw) => {
         const s = String(raw).toLowerCase().trim();
         if (s === "admin" || s === "1") return 1;
-        // 0, "0", "user", "customer", "2" all map to customer
         return 2;
       };
 
       const numericRole = normalizeRole(data.role);
 
-      // Save JWT token
+      // Save token
       localStorage.setItem("token", data.token);
-
-      // Save normalized numeric role
       localStorage.setItem("role", numericRole);
 
-      // Store user in AuthContext with normalized role
+      // Save to context
       login({ ...data, role: numericRole });
 
-      // Role based navigation
+      // Redirect
       if (numericRole === 1) {
-        navigate("/Admin"); // Admin Dashboard
+        navigate("/Admin");
       } else {
-        navigate("/Homepage1"); // User Homepage
+        navigate("/Homepage1");
       }
 
     } catch (err) {
       console.error("Login Error:", err);
 
       if (err.response) {
-        setError(err.response.data.message || "Invalid Email or Password");
+        setError(err.response.data?.message || "Invalid Email or Password");
+      } else if (err.request) {
+        setError("Server not responding. Check backend.");
       } else {
-        setError("Cannot connect to server");
+        setError("Something went wrong");
       }
     }
 
@@ -114,7 +112,6 @@ const Login = () => {
                   className="w-full py-2 pl-10 border-b border-amber-300 focus:border-amber-600 focus:outline-none"
                   required
                 />
-
                 <FaEnvelope className="absolute left-2 top-3 text-amber-600" />
               </div>
 
@@ -129,11 +126,10 @@ const Login = () => {
                   className="w-full py-2 pl-10 border-b border-amber-300 focus:border-amber-600 focus:outline-none"
                   required
                 />
-
                 <FaLock className="absolute left-2 top-3 text-amber-600" />
               </div>
 
-              {/* Login Button */}
+              {/* Button */}
               <button
                 type="submit"
                 disabled={loading}
@@ -142,7 +138,7 @@ const Login = () => {
                 {loading ? "Logging in..." : "Login"}
               </button>
 
-              {/* Error Message */}
+              {/* Error */}
               {error && (
                 <p className="mt-2 text-red-500 text-sm text-center">
                   {error}
@@ -163,17 +159,12 @@ const Login = () => {
 
           </div>
 
-          {/* RIGHT SIDE WELCOME */}
+          {/* RIGHT SIDE */}
           <div className="w-1/2 bg-gradient-to-br from-amber-500 to-amber-600 text-white flex flex-col justify-center items-center p-8">
-
-            <h2 className="text-3xl font-extrabold">
-              WELCOME
-            </h2>
-
+            <h2 className="text-3xl font-extrabold">WELCOME</h2>
             <p className="mt-4 text-sm text-center">
               Login to access your account and continue.
             </p>
-
           </div>
 
         </div>

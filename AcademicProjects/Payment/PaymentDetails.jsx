@@ -11,7 +11,7 @@ export default function PaymentPage() {
   const [showSuccess, setShowSuccess] = useState(false);
 
   // API URL (change port if needed)
-  const API_URL = "http://localhost:5155/api/Payment";
+  const API_URL = "https://localhost:7080/api/Payment";
 
   // Load cart
   useEffect(() => {
@@ -71,7 +71,7 @@ export default function PaymentPage() {
 
       try {
         console.log("Submitting Order Payload:", newOrder);
-        await axios.post("http://localhost:5155/api/Orders/CreateOrder", newOrder);
+        await axios.post("https://localhost:7080/api/Orders/CreateOrder", newOrder);
       } catch (orderErr) {
         console.error("Order API Error:", orderErr);
       }
