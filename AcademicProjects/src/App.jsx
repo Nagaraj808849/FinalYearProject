@@ -2,7 +2,7 @@ import React from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import axios from "axios";
 
-// 🔹 Global Axios Interceptor
+// ðŸ”¹ Global Axios Interceptor
 axios.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("token");
@@ -29,49 +29,64 @@ import CartPage from "../Menu/Cartpage.jsx";
 import { AuthProvider } from "./context/AuthContext";
 
 
-// 🔹 Normalize role from any format to number: 2 or "2" → 2, "User" → 2, "Admin"/"Admin" → 1
-// Note: role=0 means the DB didn't set a role (new users from sp_InsertRegistration) — treat as Customer (2)
-const normalizeRole = (rawRole) => {
-  if (!rawRole && rawRole !== 0) return 2; // null/undefined → Customer
-  const s = String(rawRole).toLowerCase().trim();
-  if (s === "admin" || s === "1") return 1;
-  if (s === "user" || s === "customer" || s === "2" || s === "0" || s === "") return 2;
-  const n = Number(rawRole);
-  return isNaN(n) ? 2 : (n === 1 ? 1 : 2); // default to Customer for any unknown value
-};
+import { useAuth } from "./context/useAuth";
 
-// 🔹 Embedded ProtectedRoute
+// ðŸ”¹ ProtectedRoute using useAuth hook
 const ProtectedRoute = ({ children, requiredRole }) => {
+  const { isAuthenticated, role, loading } = useAuth();
 
-  const token = localStorage.getItem("token");
-  const rawRole = localStorage.getItem("role");
-  const role = normalizeRole(rawRole);
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-xl font-semibold text-amber-900 animate-pulse">Loading Application...</div>
+      </div>
+    );
+  }
 
   // Not logged in at all
-  if (!token) {
+  if (!isAuthenticated) {
     return <Navigate to="/Login" replace />;
   }
 
   if (requiredRole) {
-    // Admin (1) can see everything — no restriction
-    if (role === 1) {
-      // Only block Admin from UserDash (role 2 only route) if you want isolation
-      // For now: Admin can see all pages
+    const numericRole = Number(role);
+    
+    // Admin (1) can see everything
+    if (numericRole === 1) {
       return children;
     }
 
     // User (2) can only see role-2 routes
-    if (role === 2 && requiredRole === 2) {
+    if (numericRole === 2 && requiredRole === 2) {
       return children;
     }
 
-    // User (2) trying to access Admin (1) route — redirect home
-    if (role === 2 && requiredRole === 1) {
+    // Role mismatch (e.g. User trying to access Admin route)
+    if (numericRole === 2 && requiredRole === 1) {
       return <Navigate to="/Homepage1" replace />;
     }
 
-    // Unknown role — redirect to login
+    // Fallback
     return <Navigate to="/Login" replace />;
+  }
+
+  return children;
+};
+
+
+// ðŸ”¹ RedirectIfLoggedIn using useAuth hook
+const RedirectIfLoggedIn = ({ children }) => {
+  const { isAuthenticated, role, loading } = useAuth();
+
+  if (loading) return null; // Wait for auth to resolve
+
+  if (isAuthenticated) {
+    const numericRole = Number(role);
+    // Already logged in - redirect based on role
+    if (numericRole === 1) {
+      return <Navigate to="/Admin" replace />;
+    }
+    return <Navigate to="/Homepage1" replace />;
   }
 
   return children;
@@ -87,8 +102,16 @@ function App() {
 
           {/* Public Routes */}
           <Route path="/" element={<Frontpage />} />
-          <Route path="/Login" element={<Login />} />
-          <Route path="/Signup" element={<Signup />} />
+          <Route path="/Login" element={
+            <RedirectIfLoggedIn>
+              <Login />
+            </RedirectIfLoggedIn>
+          } />
+          <Route path="/Signup" element={
+            <RedirectIfLoggedIn>
+              <Signup />
+            </RedirectIfLoggedIn>
+          } />
           <Route path="/Homepage1" element={<Homepage1 />} />
           <Route path="/Menu1" element={<Menu1 />} />
 
@@ -130,7 +153,7 @@ function App() {
             }
           />
 
-          {/* 🔴 ADMIN ONLY ROUTE */}
+          {/* ðŸ”´ ADMIN ONLY ROUTE */}
 
           <Route
             path="/Admin"
@@ -149,3 +172,4 @@ function App() {
 }
 
 export default App;
+

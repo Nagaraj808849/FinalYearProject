@@ -61,6 +61,40 @@ CREATE TABLE TableBooking (
     FOREIGN KEY (customer_id) REFERENCES Customers(customer_id)
 );
 
+## Project Setup & Running Instructions
 
+### 1. Running the Backend in Visual Studio
+The backend is a C# ASP.NET Core Web API.
+1. Open **Visual Studio** (not VS Code).
+2. Go to **File > Open > Project/Solution...**
+3. Navigate to `D:\AcademicProject\RestaurantManagementSystem\` and select the `RestaurantManagementSystem.sln` file.
+4. Ensure the start-up project is set to `RestaurantManagementSystem`.
+5. Press `F5` or click the **Run / IIS Express** (or HTTPS profile) configuration play button in the toolbar.
+6. The backend API will start running (typically listening on `https://localhost:7080`).
 
+### 2. Running the Frontend in VS Code
+The frontend is a React application built with Vite and Tailwind CSS.
+1. Open **Visual Studio Code** (VS Code).
+2. Open the frontend folder: `D:\AcademicProject\AcademicProjects`.
+3. Open a new terminal (`Ctrl + ~` or `Cmd + ~`) in VS Code.
+4. Install the necessary dependencies (if you haven't already):
+   ```bash
+   npm install
+   ```
+5. Start the development server:
+   ```bash
+   npm run dev
+   ```
+6. The frontend application will launch and tell you the local URL (usually `http://localhost:5173`). Control-click or open this URL in your browser to view the system.
 
+---
+
+## Admin Dashboard Features Details
+Once both the backend and frontend are running, log in with an Admin account to access the comprehensive **Admin Dashboard**, which fetches and displays all required details from the database:
+
+- **Key Metrics Overview:** Instantly view Total Users, Total Orders, Total Revenue, and Pending Orders.
+- **Recent Orders:** View essential order tracking details including Order ID, Customer Email, categorized Items, Total Amount, Date, and adjustable Status fields.
+- **Upcoming Reservations:** Get real-time data on table bookings including Guest Name, Date & Time, Number of Guests (PAX), and any Special Requests.
+- **Manage Users:** See newly registered accounts and manage current registered users.
+- **Manage Menu Items:** Fully comprehensive tool to View, Add, and Manage restaurant menu items including their prices, categories, and image assets.
+- **Detailed Pages:** Dedicated, drill-down tabs for *Menu*, *Orders*, *Users*, and *Reservations* to handle comprehensive business operations.

@@ -1,4 +1,4 @@
-import React from "react";
+﻿import React from "react";
 import videoFile from "../src/assets/HomeVed.mp4";
 import { Link } from "react-router-dom";
 import { FaArrowRightLong } from "react-icons/fa6";
@@ -51,3 +51,4 @@ const Frontpage = () => {
 };
 
 export default Frontpage;
+

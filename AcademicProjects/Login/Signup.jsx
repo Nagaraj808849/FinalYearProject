@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+﻿import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { FaUser, FaEnvelope, FaLock } from "react-icons/fa";
 import axios from "axios";
@@ -49,7 +49,7 @@ const Signup = () => {
 
     try {
       const response = await axios.post(
-        "https://localhost:7080/api/Registration/InsertRegisters",
+        "http://localhost:7080/api/Registration/InsertRegisters",
 
         {
           "firstName": formData.firstName,
@@ -174,3 +174,5 @@ const Signup = () => {
 };
 
 export default Signup;
+
+

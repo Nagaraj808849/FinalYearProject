@@ -1,4 +1,4 @@
-import React from "react";
+﻿import React from "react";
 import axios from "axios";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
@@ -36,11 +36,11 @@ const TableOrder = () => {
       console.log("Sending Data:", reservationData);
 
       const response = await axios.post(
-        "https://localhost:7080/api/TableReservation/BookTable",
+        "http://localhost:7080/api/TableReservation/BookTable",
         reservationData
       );
 
-      alert("✅ Table booked successfully!");
+      alert("\u2705 Table booked successfully!");
       console.log(response.data);
 
       reset();
@@ -49,9 +49,9 @@ const TableOrder = () => {
       console.error("Reservation Error:", error);
 
       if (error.response) {
-        alert("❌ " + JSON.stringify(error.response.data));
+        alert("Ã¢ÂÅ’ " + JSON.stringify(error.response.data));
       } else {
-        alert("❌ Failed to connect to API");
+        alert("Ã¢ÂÅ’ Failed to connect to API");
       }
     }
   };
@@ -147,3 +147,6 @@ const TableOrder = () => {
 };
 
 export default TableOrder;
+
+
+

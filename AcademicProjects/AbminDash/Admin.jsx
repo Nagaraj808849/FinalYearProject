@@ -36,7 +36,7 @@ export default function Admin() {
 
   const fetchMenu = async () => {
     try {
-      const response = await axios.get("https://localhost:7080/api/Menu");
+      const response = await axios.get("http://localhost:7080/api/Menu");
       setMenu(response.data);
     } catch (err) {
       console.error("Failed to fetch menu:", err);
@@ -45,7 +45,7 @@ export default function Admin() {
 
   const fetchOrders = async () => {
     try {
-      const response = await axios.get("https://localhost:7080/api/Orders/GetAllOrders");
+      const response = await axios.get("http://localhost:7080/api/Orders/GetAllOrders");
       setOrders(response.data);
     } catch (err) {
       console.error("Failed to fetch orders:", err);
@@ -54,7 +54,7 @@ export default function Admin() {
 
   const fetchReservations = async () => {
     try {
-      const response = await axios.get("https://localhost:7080/api/TableReservation/GetAllReservations");
+      const response = await axios.get("http://localhost:7080/api/TableReservation/GetAllReservations");
       setReservations(response.data);
     } catch (err) {
       console.error("Failed to fetch reservations:", err);
@@ -69,8 +69,8 @@ export default function Admin() {
 
   const fetchUsers = async () => {
     try {
-      const response = await axios.get("https://localhost:7080/api/Registration/GetRegisters");
-      
+      const response = await axios.get("http://localhost:7080/api/Registration/GetRegisters");
+
       const mappedUsers = response.data.map((u) => ({
         id: u.userId,
         name: `${u.firstName || ""} ${u.lastName || ""}`.trim(),
@@ -116,7 +116,7 @@ export default function Admin() {
   const removeUser = async (userId) => {
     if (!confirm(`Remove user? This cannot be undone.`)) return;
     try {
-      await axios.delete(`https://localhost:7080/api/Registration/DeleteRegister/${userId}`);
+      await axios.delete(`http://localhost:7080/api/Registration/DeleteRegister/${userId}`);
       fetchUsers();
     } catch (err) {
       console.error(err);
@@ -126,7 +126,7 @@ export default function Admin() {
 
   const updateOrderStatus = async (orderId, newStatus) => {
     try {
-      await axios.put("https://localhost:7080/api/Orders/UpdateStatus", {
+      await axios.put("http://localhost:7080/api/Orders/UpdateStatus", {
         Id: orderId,
         Status: newStatus
       });
@@ -171,7 +171,7 @@ export default function Admin() {
         image: newMenuData.image,
         is_available: newMenuData.is_available
       };
-      const response = await axios.post("https://localhost:7080/api/Menu/AddMenuItem", payload, {
+      const response = await axios.post("http://localhost:7080/api/Menu/AddMenuItem", payload, {
         headers: { "Content-Type": "application/json" }
       });
       setMenuMessage({ text: "Menu item created successfully!", type: "success" });
@@ -189,10 +189,25 @@ export default function Admin() {
     }
   };
 
+  const formatItems = (itemsStr) => {
+    try {
+      if (!itemsStr) return "-";
+      const parsed = JSON.parse(itemsStr);
+      if (Array.isArray(parsed)) {
+        return parsed.map((item) => `${item.name} (x${item.quantity || 1})`).join(", ");
+      }
+      return itemsStr;
+    } catch {
+      return itemsStr; // Fallback
+    }
+  };
+
   const stats = useMemo(() => {
     const totalUsers = users.length;
     const totalOrders = orders.length;
-    const revenue = orders.reduce((s, o) => s + (Number(o.totalAmount) || 0), 0);
+    const revenue = orders
+      .filter((o) => o.status === "Delivered")
+      .reduce((s, o) => s + (Number(o.totalAmount) || 0), 0);
     const pending = orders.filter((o) => o.status === "Pending").length;
     return { totalUsers, totalOrders, revenue, pending };
   }, [users, orders]);
@@ -211,21 +226,19 @@ export default function Admin() {
         )}
 
         {/* Sidebar */}
-        <aside className={`fixed md:relative w-72 md:w-72 bg-gradient-to-b from-amber-900 to-amber-800 text-white p-6 shadow-xl z-40 h-full md:h-auto transition-transform duration-300 ${
-          sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
-        }`}>
+        <aside className={`fixed md:relative w-72 md:w-72 bg-gradient-to-b from-amber-900 to-amber-800 text-white p-6 shadow-xl z-40 h-full md:h-auto transition-transform duration-300 ${sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
+          }`}>
           <div className="mb-8">
             <h2 className="text-2xl font-bold mb-6">Admin Panel</h2>
           </div>
-          
+
           <nav className="flex flex-col gap-3">
             <button
               onClick={() => { setView("Dashboard"); setSidebarOpen(false); }}
-              className={`flex items-center gap-3 px-4 py-3 rounded-lg transition font-medium ${
-                view === "Dashboard" 
-                  ? "bg-amber-700 text-white shadow-lg" 
+              className={`flex items-center gap-3 px-4 py-3 rounded-lg transition font-medium ${view === "Dashboard"
+                  ? "bg-amber-700 text-white shadow-lg"
                   : "hover:bg-amber-700 text-amber-100"
-              }`}
+                }`}
             >
               <BarChart3 size={20} />
               Dashboard
@@ -233,22 +246,21 @@ export default function Admin() {
 
             <button
               onClick={() => { setView("Menu"); setSidebarOpen(false); }}
-              className={`flex items-center gap-3 px-4 py-3 rounded-lg transition font-medium ${
-                view === "Menu" 
-                  ? "bg-amber-700 text-white shadow-lg" 
+              className={`flex items-center gap-3 px-4 py-3 rounded-lg transition font-medium ${view === "Menu"
+                  ? "bg-amber-700 text-white shadow-lg"
                   : "hover:bg-amber-700 text-amber-100"
-              }`}
+                }`}
             >
-              🍽️ Menu
+              <MenuIcon size={20} />
+              Menu
             </button>
 
             <button
               onClick={() => { setView("Orders"); setSidebarOpen(false); }}
-              className={`flex items-center gap-3 px-4 py-3 rounded-lg transition font-medium ${
-                view === "Orders" 
-                  ? "bg-amber-700 text-white shadow-lg" 
+              className={`flex items-center gap-3 px-4 py-3 rounded-lg transition font-medium ${view === "Orders"
+                  ? "bg-amber-700 text-white shadow-lg"
                   : "hover:bg-amber-700 text-amber-100"
-              }`}
+                }`}
             >
               <ShoppingCart size={20} />
               Orders
@@ -256,11 +268,10 @@ export default function Admin() {
 
             <button
               onClick={() => { setView("Users"); setSidebarOpen(false); }}
-              className={`flex items-center gap-3 px-4 py-3 rounded-lg transition font-medium ${
-                view === "Users" 
-                  ? "bg-amber-700 text-white shadow-lg" 
+              className={`flex items-center gap-3 px-4 py-3 rounded-lg transition font-medium ${view === "Users"
+                  ? "bg-amber-700 text-white shadow-lg"
                   : "hover:bg-amber-700 text-amber-100"
-              }`}
+                }`}
             >
               <Users size={20} />
               Users
@@ -268,11 +279,10 @@ export default function Admin() {
 
             <button
               onClick={() => { setView("Reservations"); setSidebarOpen(false); }}
-              className={`flex items-center gap-3 px-4 py-3 rounded-lg transition font-medium ${
-                view === "Reservations" 
-                  ? "bg-amber-700 text-white shadow-lg" 
+              className={`flex items-center gap-3 px-4 py-3 rounded-lg transition font-medium ${view === "Reservations"
+                  ? "bg-amber-700 text-white shadow-lg"
                   : "hover:bg-amber-700 text-amber-100"
-              }`}
+                }`}
             >
               <ClipboardList size={20} />
               Reservations
@@ -280,11 +290,10 @@ export default function Admin() {
 
             <button
               onClick={() => { setView("Settings"); setSidebarOpen(false); }}
-              className={`flex items-center gap-3 px-4 py-3 rounded-lg transition font-medium ${
-                view === "Settings" 
-                  ? "bg-amber-700 text-white shadow-lg" 
+              className={`flex items-center gap-3 px-4 py-3 rounded-lg transition font-medium ${view === "Settings"
+                  ? "bg-amber-700 text-white shadow-lg"
                   : "hover:bg-amber-700 text-amber-100"
-              }`}
+                }`}
             >
               <Settings size={20} />
               Settings
@@ -293,10 +302,15 @@ export default function Admin() {
 
           <div className="mt-8 pt-6 border-t border-amber-700">
             <button
-              onClick={() => navigate(-1)}
-              className="w-full bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-semibold transition"
+              onClick={() => {
+                if (window.confirm("Are you sure you want to logout?")) {
+                  logout();
+                  navigate("/Login");
+                }
+              }}
+              className="w-full bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-semibold transition flex items-center justify-center gap-2"
             >
-              ← Go Back
+              <LogOut size={18} /> Logout
             </button>
           </div>
         </aside>
@@ -339,7 +353,7 @@ export default function Admin() {
                   <div className="flex items-center justify-between">
                     <div>
                       <div className="text-amber-700 font-semibold text-sm mb-1">Total Revenue</div>
-                      <div className="text-3xl font-bold text-amber-900">₹{stats.revenue}</div>
+                      <div className="text-3xl font-bold text-amber-900">{"\u20B9"}{stats.revenue?.toFixed(2)}</div>
                     </div>
                     <TrendingUp size={40} className="text-amber-300" />
                   </div>
@@ -371,6 +385,8 @@ export default function Admin() {
                         <thead className="bg-gradient-to-r from-amber-500 to-amber-600 text-white">
                           <tr>
                             <th className="px-6 py-3 text-left font-semibold">Order ID</th>
+                            <th className="px-6 py-3 text-left font-semibold">Customer</th>
+                            <th className="px-6 py-3 text-left font-semibold">Items</th>
                             <th className="px-6 py-3 text-left font-semibold">Amount</th>
                             <th className="px-6 py-3 text-left font-semibold">Date</th>
                             <th className="px-6 py-3 text-left font-semibold">Status</th>
@@ -384,19 +400,86 @@ export default function Admin() {
                             .map((o) => (
                               <tr key={o.id} className="hover:bg-amber-50 transition">
                                 <td className="px-6 py-4 font-semibold text-amber-900">{o.id}</td>
-                                <td className="px-6 py-4 font-bold text-amber-700">₹{o.totalAmount}</td>
+                                <td className="px-6 py-4 text-gray-700">{o.userEmail}</td>
+                                <td className="px-6 py-4 text-gray-600 text-sm max-w-[200px] truncate" title={formatItems(o.items)}>{formatItems(o.items)}</td>
+                                <td className="px-6 py-4 font-bold text-amber-700">{"\u20B9"}{Number(o.totalAmount || 0).toFixed(2)}</td>
                                 <td className="px-6 py-4 text-gray-600">{o.orderDate}</td>
                                 <td className="px-6 py-4">
-                                  <span className={`px-4 py-2 rounded-full text-sm font-semibold ${
-                                    o.status === "Delivered" ? "bg-green-100 text-green-700" :
-                                    o.status === "Pending" ? "bg-yellow-100 text-yellow-700" :
-                                    "bg-gray-100 text-gray-700"
-                                  }`}>
+                                  <span className={`px-4 py-2 rounded-full text-sm font-semibold ${o.status === "Delivered" ? "bg-green-100 text-green-700" :
+                                      o.status === "Pending" ? "bg-yellow-100 text-yellow-700" :
+                                        "bg-gray-100 text-gray-700"
+                                    }`}>
                                     {o.status || "Pending"}
                                   </span>
                                 </td>
                               </tr>
                             ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Recent Reservations Section */}
+              <div className="mt-8">
+                <h3 className="text-2xl font-bold text-amber-900 mb-4">Upcoming Reservations</h3>
+                <div className="bg-white rounded-xl shadow-lg overflow-hidden border border-amber-200">
+                  {reservations.length === 0 ? (
+                    <div className="text-center py-12">
+                      <p className="text-gray-500 text-lg">No reservations yet</p>
+                    </div>
+                  ) : (
+                    <div className="overflow-x-auto">
+                      <table className="w-full">
+                        <thead className="bg-gradient-to-r from-amber-500 to-amber-600 text-white">
+                          <tr>
+                            <th className="px-6 py-3 text-left font-semibold">Guest Name</th>
+                            <th className="px-6 py-3 text-left font-semibold">Date & Time</th>
+                            <th className="px-6 py-3 text-left font-semibold">People</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-amber-100">
+                          {reservations.slice(0, 6).map((r, i) => (
+                            <tr key={i} className="hover:bg-amber-50 transition">
+                              <td className="px-6 py-4 font-semibold text-amber-900">{r.userName}</td>
+                              <td className="px-6 py-4 text-gray-600">{new Date(r.reservationDateTime).toLocaleString()}</td>
+                              <td className="px-6 py-4 font-bold text-amber-700">{r.noOfPeople} PAX</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Recent Users Section */}
+              <div className="mt-8">
+                <h3 className="text-2xl font-bold text-amber-900 mb-4">New Users</h3>
+                <div className="bg-white rounded-xl shadow-lg overflow-hidden border border-amber-200">
+                  {users.length === 0 ? (
+                    <div className="text-center py-12">
+                      <p className="text-gray-500 text-lg">No users yet</p>
+                    </div>
+                  ) : (
+                    <div className="overflow-x-auto">
+                      <table className="w-full">
+                        <thead className="bg-gradient-to-r from-amber-500 to-amber-600 text-white">
+                          <tr>
+                            <th className="px-6 py-3 text-left font-semibold">Name</th>
+                            <th className="px-6 py-3 text-left font-semibold">Email</th>
+                            <th className="px-6 py-3 text-left font-semibold">Role</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-amber-100">
+                          {users.slice(0, 6).map((u, i) => (
+                            <tr key={i} className="hover:bg-amber-50 transition">
+                              <td className="px-6 py-4 font-semibold text-amber-900">{u.name}</td>
+                              <td className="px-6 py-4 text-gray-600">{u.email}</td>
+                              <td className="px-6 py-4 font-bold text-amber-700">{u.role}</td>
+                            </tr>
+                          ))}
                         </tbody>
                       </table>
                     </div>
@@ -459,13 +542,13 @@ export default function Admin() {
                               {!item.is_available && <span className="ml-2 text-xs bg-red-100 text-red-600 px-2 py-1 rounded">Unavailable</span>}
                             </td>
                             <td className="px-3 sm:px-6 py-2 sm:py-4 text-gray-600 text-sm max-w-xs truncate">{item.description}</td>
-                            <td className="px-3 sm:px-6 py-2 sm:py-4 font-bold text-amber-700">₹{item.price}</td>
+                            <td className="px-3 sm:px-6 py-2 sm:py-4 font-bold text-amber-700">{"\u20B9"}{item.price}</td>
                             <td className="px-3 sm:px-6 py-2 sm:py-4">
                               <button
                                 onClick={async () => {
                                   if (confirm(`Delete ${item.item_name}?`)) {
                                     try {
-                                      await axios.delete(`https://localhost:7080/api/Menu/DeleteMenuItem/${item.menu_id}`);
+                                      await axios.delete(`http://localhost:7080/api/Menu/DeleteMenuItem/${item.menu_id}`);
                                       fetchMenu();
                                     } catch (err) {
                                       console.error(err);
@@ -498,10 +581,9 @@ export default function Admin() {
                     </div>
 
                     {menuMessage.text && (
-                      <div className={`p-3 rounded mb-4 font-semibold text-center ${
-                        menuMessage.type === 'success' ? 'bg-green-100 text-green-700' : 
-                        menuMessage.type === 'error' ? 'bg-red-100 text-red-700' : 'bg-blue-100 text-blue-700'
-                      }`}>
+                      <div className={`p-3 rounded mb-4 font-semibold text-center ${menuMessage.type === 'success' ? 'bg-green-100 text-green-700' :
+                          menuMessage.type === 'error' ? 'bg-red-100 text-red-700' : 'bg-blue-100 text-blue-700'
+                        }`}>
                         {menuMessage.text}
                       </div>
                     )}
@@ -510,13 +592,13 @@ export default function Admin() {
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                           <label className="block text-sm font-semibold text-gray-700 mb-1">Item Name</label>
-                          <input required type="text" className="w-full border border-gray-300 rounded p-2 focus:ring-2 focus:ring-amber-500 outline-none" 
-                            value={newMenuData.item_name} onChange={(e) => setNewMenuData({...newMenuData, item_name: e.target.value})} />
+                          <input required type="text" className="w-full border border-gray-300 rounded p-2 focus:ring-2 focus:ring-amber-500 outline-none"
+                            value={newMenuData.item_name} onChange={(e) => setNewMenuData({ ...newMenuData, item_name: e.target.value })} />
                         </div>
                         <div>
                           <label className="block text-sm font-semibold text-gray-700 mb-1">Category</label>
                           <select className="w-full border border-gray-300 rounded p-2 focus:ring-2 focus:ring-amber-500 outline-none"
-                            value={newMenuData.category_id} onChange={(e) => setNewMenuData({...newMenuData, category_id: e.target.value})}>
+                            value={newMenuData.category_id} onChange={(e) => setNewMenuData({ ...newMenuData, category_id: e.target.value })}>
                             <option value={1}>Starters</option>
                             <option value={2}>Main Course</option>
                             <option value={3}>Desserts</option>
@@ -525,15 +607,15 @@ export default function Admin() {
                           </select>
                         </div>
                         <div>
-                          <label className="block text-sm font-semibold text-gray-700 mb-1">Price (₹)</label>
+                          <label className="block text-sm font-semibold text-gray-700 mb-1">Price ({"\u20B9"})</label>
                           <input required type="number" min="0" className="w-full border border-gray-300 rounded p-2 focus:ring-2 focus:ring-amber-500 outline-none"
-                            value={newMenuData.price} onChange={(e) => setNewMenuData({...newMenuData, price: e.target.value})} />
+                            value={newMenuData.price} onChange={(e) => setNewMenuData({ ...newMenuData, price: e.target.value })} />
                         </div>
                         <div>
                           <label className="block text-sm font-semibold text-gray-700 mb-1">Available?</label>
                           <div className="flex items-center h-10">
-                            <input type="checkbox" className="w-5 h-5 accent-amber-600" 
-                              checked={newMenuData.is_available} onChange={(e) => setNewMenuData({...newMenuData, is_available: e.target.checked})} />
+                            <input type="checkbox" className="w-5 h-5 accent-amber-600"
+                              checked={newMenuData.is_available} onChange={(e) => setNewMenuData({ ...newMenuData, is_available: e.target.checked })} />
                             <span className="ml-2 text-gray-700">Yes, it's available</span>
                           </div>
                         </div>
@@ -542,7 +624,7 @@ export default function Admin() {
                       <div>
                         <label className="block text-sm font-semibold text-gray-700 mb-1">Description</label>
                         <textarea required rows="3" className="w-full border border-gray-300 rounded p-2 focus:ring-2 focus:ring-amber-500 outline-none w-full"
-                          value={newMenuData.description} onChange={(e) => setNewMenuData({...newMenuData, description: e.target.value})}></textarea>
+                          value={newMenuData.description} onChange={(e) => setNewMenuData({ ...newMenuData, description: e.target.value })}></textarea>
                       </div>
 
                       <div>
@@ -576,13 +658,13 @@ export default function Admin() {
               <div className="bg-white rounded-xl shadow-lg border border-amber-200 p-6 flex items-center justify-between mb-6">
                 <div>
                   <h3 className="text-lg font-bold text-amber-900">Current Reservations</h3>
-                  <p className="text-gray-500 text-sm">Real-time table bookings from the database.</p>
+                  <p className="text-gray-500 text-sm">Real-time reservation data from the database.</p>
                 </div>
                 <button
                   onClick={fetchReservations}
                   className="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white px-6 py-3 rounded-lg font-semibold transition shadow-lg text-sm sm:text-base whitespace-nowrap"
                 >
-                  🔄 Refresh
+                  Refresh
                 </button>
               </div>
 
@@ -634,14 +716,14 @@ export default function Admin() {
 
               <div className="bg-white rounded-xl shadow-lg border border-amber-200 p-6 flex items-center justify-between mb-6">
                 <div>
-                  <h3 className="text-lg font-bold text-amber-900">Current Orders</h3>
-                  <p className="text-gray-500 text-sm">Real-time customer orders from the database.</p>
+                  <h3 className="text-lg font-bold text-amber-900">All Orders</h3>
+                  <p className="text-gray-500 text-sm">Real-time order data from the database.</p>
                 </div>
                 <button
                   onClick={fetchOrders}
                   className="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white px-6 py-3 rounded-lg font-semibold transition shadow-lg text-sm sm:text-base whitespace-nowrap"
                 >
-                  🔄 Refresh
+                  Refresh
                 </button>
               </div>
 
@@ -656,6 +738,8 @@ export default function Admin() {
                       <thead className="bg-gradient-to-r from-amber-500 to-amber-600 text-white">
                         <tr>
                           <th className="px-2 sm:px-6 py-2 sm:py-4 text-left font-semibold">Order ID</th>
+                          <th className="px-2 sm:px-6 py-2 sm:py-4 text-left font-semibold">Customer Email</th>
+                          <th className="px-2 sm:px-6 py-2 sm:py-4 text-left font-semibold">Items</th>
                           <th className="px-2 sm:px-6 py-2 sm:py-4 text-left font-semibold">Amount</th>
                           <th className="px-2 sm:px-6 py-2 sm:py-4 text-left font-semibold">Date & Time</th>
                           <th className="px-2 sm:px-6 py-2 sm:py-4 text-left font-semibold">Status</th>
@@ -669,7 +753,9 @@ export default function Admin() {
                           .map((o) => (
                             <tr key={o.id} className="hover:bg-amber-50 transition">
                               <td className="px-2 sm:px-6 py-2 sm:py-4 font-semibold text-amber-900">{o.id}</td>
-                              <td className="px-2 sm:px-6 py-2 sm:py-4 font-bold text-amber-700">₹{o.totalAmount}</td>
+                              <td className="px-2 sm:px-6 py-2 sm:py-4 text-gray-700">{o.userEmail}</td>
+                              <td className="px-2 sm:px-6 py-2 sm:py-4 text-gray-600 text-sm max-w-xs truncate" title={formatItems(o.items)}>{formatItems(o.items)}</td>
+                              <td className="px-2 sm:px-6 py-2 sm:py-4 font-bold text-amber-700">{"\u20B9"}{Number(o.totalAmount || 0).toFixed(2)}</td>
                               <td className="px-2 sm:px-6 py-2 sm:py-4 text-gray-600 text-xs sm:text-base">{o.orderDate}</td>
                               <td className="px-2 sm:px-6 py-2 sm:py-4">
                                 <select
@@ -718,7 +804,7 @@ export default function Admin() {
                   onClick={fetchUsers}
                   className="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white px-6 py-3 rounded-lg font-semibold transition shadow-lg text-sm sm:text-base whitespace-nowrap"
                 >
-                  🔄 Refresh
+                  Refresh
                 </button>
               </div>
 
@@ -741,15 +827,14 @@ export default function Admin() {
                       <tbody className="divide-y divide-amber-100">
                         {users.map((u) => (
                           <tr key={u.id} className="hover:bg-amber-50 transition">
-                            <td className="px-2 sm:px-6 py-2 sm:py-4 font-semibold text-amber-900">👤 {u.name}</td>
+                            <td className="px-2 sm:px-6 py-2 sm:py-4 font-semibold text-amber-900">{u.name}</td>
                             <td className="px-2 sm:px-6 py-2 sm:py-4 text-gray-600 hidden md:table-cell">{u.email || "-"}</td>
                             <td className="px-2 sm:px-6 py-2 sm:py-4">
                               <span
-                                className={`px-2 sm:px-3 py-1 rounded-full text-xs font-bold ${
-                                  u.role === "Admin"
+                                className={`px-2 sm:px-3 py-1 rounded-full text-xs font-bold ${u.role === "Admin"
                                     ? "bg-purple-100 text-purple-700"
                                     : "bg-blue-100 text-blue-700"
-                                }`}
+                                  }`}
                               >
                                 {u.role}
                               </span>
@@ -778,31 +863,29 @@ export default function Admin() {
                 <h2 className="text-2xl sm:text-4xl font-bold text-amber-900 mb-1 sm:mb-2">Settings</h2>
                 <p className="text-sm sm:text-base text-amber-700">Golden Essence Restaurant Information</p>
               </div>
-              
+
               <div className="bg-gradient-to-br from-white to-amber-50 border-2 border-amber-300 rounded-xl shadow-lg p-4 sm:p-8 max-w-2xl">
                 <div className="space-y-4 sm:space-y-6">
                   <div className="border-b border-amber-200 pb-3 sm:pb-4">
-                    <label className="block text-amber-900 font-semibold mb-1 sm:mb-2 text-sm sm:text-base">🍴 Restaurant Name</label>
+                    <label className="block text-amber-900 font-semibold mb-1 sm:mb-2 text-sm sm:text-base">Restaurant Name</label>
                     <p className="text-lg sm:text-2xl font-bold text-amber-700">Golden Essence</p>
                   </div>
-                  
+
                   <div className="border-b border-amber-200 pb-3 sm:pb-4">
-                    <label className="block text-amber-900 font-semibold mb-1 sm:mb-2 text-sm sm:text-base">🕐 Operating Hours</label>
+                    <label className="block text-amber-900 font-semibold mb-1 sm:mb-2 text-sm sm:text-base">Operating Hours</label>
                     <p className="text-base sm:text-lg text-gray-700">10:00 AM - 11:00 PM (Daily)</p>
                   </div>
-                  
+
                   <div className="border-b border-amber-200 pb-3 sm:pb-4">
-                    <label className="block text-amber-900 font-semibold mb-1 sm:mb-2 text-sm sm:text-base">📧 Contact Email</label>
+                    <label className="block text-amber-900 font-semibold mb-1 sm:mb-2 text-sm sm:text-base">Contact Email</label>
                     <p className="text-base sm:text-lg text-gray-700">info@goldenessence.com</p>
                   </div>
-                  
                   <div className="border-b border-amber-200 pb-3 sm:pb-4">
-                    <label className="block text-amber-900 font-semibold mb-1 sm:mb-2 text-sm sm:text-base">📱 Phone Number</label>
+                    <label className="block text-amber-900 font-semibold mb-1 sm:mb-2 text-sm sm:text-base">Phone Number</label>
                     <p className="text-base sm:text-lg text-gray-700">+91 98765 43210</p>
                   </div>
-                  
                   <div className="pb-4">
-                    <label className="block text-amber-900 font-semibold mb-1 sm:mb-2 text-sm sm:text-base">📍 Location</label>
+                    <label className="block text-amber-900 font-semibold mb-1 sm:mb-2 text-sm sm:text-base">Location</label>
                     <p className="text-base sm:text-lg text-gray-700">Bangalore, Karnataka, India</p>
                   </div>
                 </div>
@@ -814,3 +897,13 @@ export default function Admin() {
     </div>
   );
 }
+
+
+
+
+
+
+
+
+
+

@@ -37,7 +37,7 @@ function CartPage() {
     updateCart(updated);
   };
 
-  // Convert price to number safely — handles "₹150", 150, or "150"
+  // Convert price to number safely - handles "{"{"\u20B9"}"}150", 150, or "150"
   const parsePrice = (price) => Number(String(price).replace(/[^0-9.-]+/g, ""));
 
   const totalAmount = cartItems.reduce(
@@ -51,12 +51,12 @@ function CartPage() {
       <div className="w-full max-w-3xl">
 
         <h1 className="text-3xl font-bold mb-6 text-center text-amber-900">
-          🛒 Your Cart
+          {"\uD83D\uDED2"} Your Cart
         </h1>
 
         {cartItems.length === 0 ? (
           <div className="text-center bg-white p-10 rounded-xl shadow">
-            <p className="text-gray-600 text-lg mb-4">Your cart is empty 🛒</p>
+            <p className="text-gray-600 text-lg mb-4">Your cart is empty {"\uD83D\uDED2"}</p>
             <Link to="/Menu1">
               <button className="mt-4 bg-amber-600 hover:bg-amber-700 text-white px-6 py-2 rounded-lg font-semibold">
                 Browse Menu
@@ -75,7 +75,7 @@ function CartPage() {
                   <div>
                     <h2 className="font-medium text-lg">{item.name}</h2>
                     <p className="text-gray-500">
-                      ₹{parsePrice(item.price)}
+                      {"\u20B9"}{parsePrice(item.price)}
                     </p>
                   </div>
 
@@ -101,7 +101,7 @@ function CartPage() {
                   {/* Price & Remove */}
                   <div className="flex items-center gap-4">
                     <span className="font-semibold">
-                      ₹{parsePrice(item.price) * item.qty}
+                      {"\u20B9"}{(parsePrice(item.price) * item.qty).toFixed(2)}
                     </span>
 
                     <button
@@ -118,7 +118,7 @@ function CartPage() {
             {/* Total Section */}
             <div className="mt-6 bg-white p-6 rounded-xl shadow flex flex-col md:flex-row justify-between items-center">
               <h2 className="text-xl font-bold">
-                Total: ₹{totalAmount}
+                Total: {"\u20B9"}{totalAmount.toFixed(2)}
               </h2>
 
               <Link to="/PaymentDetails">
@@ -135,3 +135,9 @@ function CartPage() {
 }
 
 export default CartPage;
+
+
+
+
+
+

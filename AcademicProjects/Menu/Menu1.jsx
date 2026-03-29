@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ShoppingCart, CheckCircle } from "lucide-react";
+import { ShoppingCart, CheckCircle, ArrowLeft } from "lucide-react";
 import axios from "axios";
 
 export default function MenuPage() {
@@ -19,7 +19,7 @@ export default function MenuPage() {
   useEffect(() => {
     const fetchMenu = async () => {
       try {
-        const response = await axios.get("https://localhost:7080/api/Menu");
+        const response = await axios.get("http://localhost:7080/api/Menu");
 
         const categoryMap = {
           1: "Starters",
@@ -35,7 +35,7 @@ export default function MenuPage() {
           name: item.item_name,
           category: categoryMap[item.category_id] || "Other",
           description: item.description,
-          price: `₹${item.price}`,
+          price: `\u20B9${item.price}`,
           rawPrice: item.price,
           image: item.image ? `data:image/jpeg;base64,${item.image}` : null
         }));
@@ -65,7 +65,7 @@ export default function MenuPage() {
     const newCount = cart.reduce((sum, i) => sum + i.qty, 0);
     setCartCount(newCount);
 
-    // Show toast notification — no blocking alert!
+    // Show toast notification - no blocking alert!
     setToast(item.name);
     setTimeout(() => setToast(null), 2000);
   };
@@ -101,7 +101,7 @@ export default function MenuPage() {
           onClick={() => navigate(-1)}
           className="flex items-center gap-2 text-amber-900 hover:text-amber-600 font-semibold transition"
         >
-          ← Back
+          <ArrowLeft size={20} /> Back
         </button>
 
         {/* Cart Icon with live count badge */}
@@ -117,7 +117,7 @@ export default function MenuPage() {
 
       <div className="p-6">
         {/* Title */}
-        <h1 className="text-3xl font-bold text-amber-900 mb-6 text-center">🍽️ Our Menu</h1>
+        <h1 className="text-3xl font-bold text-amber-900 mb-6 text-center">{"\uD83C\uDF7D\uFE0F"} Menu</h1>
 
         {/* CATEGORY FILTER BUTTONS */}
         <div className="flex flex-wrap gap-3 mb-6 justify-center">
@@ -152,7 +152,7 @@ export default function MenuPage() {
                   <img src={item.image} className="h-48 w-full object-cover" alt={item.name} />
                 ) : (
                   <div className="h-48 w-full bg-amber-100 flex items-center justify-center text-amber-500 font-bold text-lg border-b border-amber-200">
-                    🍽️ No Image
+                    No Image
                   </div>
                 )}
 
@@ -177,7 +177,7 @@ export default function MenuPage() {
         )}
       </div>
 
-      {/* Floating "View Cart" button — appears when cart has items */}
+      {/* Floating "View Cart" button appears when cart has items */}
       {cartCount > 0 && (
         <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50">
           <Link to="/Cart">
@@ -191,3 +191,12 @@ export default function MenuPage() {
     </div>
   );
 }
+
+
+
+
+
+
+
+
+

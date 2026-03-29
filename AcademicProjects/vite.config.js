@@ -9,9 +9,9 @@ export default defineConfig({
     port: 5173,
     proxy: {
       '/api': {
-        target: 'http://localhost:5155', // ⚠️ MUST match your backend HTTP port
+        target: 'http://localhost:7080', // Backend HTTP port
         changeOrigin: true,
-        secure: false, // ignore self-signed certificate
+        secure: false,
       }
     }
   }

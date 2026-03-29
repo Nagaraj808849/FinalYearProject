@@ -11,7 +11,7 @@ export default function PaymentPage() {
   const [showSuccess, setShowSuccess] = useState(false);
 
   // API URL (change port if needed)
-  const API_URL = "https://localhost:7080/api/Payment";
+  const API_URL = "http://localhost:7080/api/Payment";
 
   // Load cart
   useEffect(() => {
@@ -71,7 +71,7 @@ export default function PaymentPage() {
 
       try {
         console.log("Submitting Order Payload:", newOrder);
-        await axios.post("https://localhost:7080/api/Orders/CreateOrder", newOrder);
+        await axios.post("http://localhost:7080/api/Orders/CreateOrder", newOrder);
       } catch (orderErr) {
         console.error("Order API Error:", orderErr);
       }
@@ -118,8 +118,8 @@ export default function PaymentPage() {
               key={item.id}
               className="flex justify-between text-sm text-gray-600 mb-1"
             >
-              <span>{item.name} × {item.qty}</span>
-              <span>₹{parsePrice(item.price) * item.qty}</span>
+              <span>{item.name} x {item.qty}</span>
+              <span>{"\u20B9"}{(parsePrice(item.price) * item.qty).toFixed(2)}</span>
             </div>
           ))}
 
@@ -127,7 +127,7 @@ export default function PaymentPage() {
 
           <div className="flex justify-between font-bold">
             <span>Total Amount</span>
-            <span>₹{totalAmount}</span>
+            <span>{"\u20B9"}{totalAmount.toFixed(2)}</span>
           </div>
 
         </div>
@@ -165,9 +165,8 @@ export default function PaymentPage() {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
 
           <div className="bg-white rounded-xl p-6 text-center">
-
             <h2 className="text-green-600 font-bold text-xl mb-2">
-              Payment Successful 🎉
+              Payment Successful! {"\uD83C\uDF89"}
             </h2>
 
             <p className="text-gray-500">
@@ -182,3 +181,8 @@ export default function PaymentPage() {
     </div>
   );
 }
+
+
+
+
+

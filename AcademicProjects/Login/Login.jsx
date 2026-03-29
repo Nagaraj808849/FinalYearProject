@@ -37,7 +37,7 @@ const Login = () => {
 
     try {
       const response = await axios.post(
-        "https://localhost:7080/api/Login/Login", // ✅ FIXED (HTTPS)
+        "http://localhost:7080/api/Login/Login", // ? FIXED (HTTPS)
         loginData,
         {
           headers: {
@@ -48,23 +48,12 @@ const Login = () => {
 
       const data = response.data;
 
-      // Normalize role
-      const normalizeRole = (raw) => {
-        const s = String(raw).toLowerCase().trim();
-        if (s === "admin" || s === "1") return 1;
-        return 2;
-      };
+      // Call centralized login from context which handles persistence
+      login(data);
 
-      const numericRole = normalizeRole(data.role);
+      // Redirect based on the role handled by the context
+      const numericRole = data.role === 1 || String(data.role) === "1" || String(data.role).toLowerCase() === "admin" ? 1 : 2;
 
-      // Save token
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("role", numericRole);
-
-      // Save to context
-      login({ ...data, role: numericRole });
-
-      // Redirect
       if (numericRole === 1) {
         navigate("/Admin");
       } else {
@@ -175,3 +164,5 @@ const Login = () => {
 };
 
 export default Login;
+
+

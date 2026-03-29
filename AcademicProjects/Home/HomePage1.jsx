@@ -80,7 +80,10 @@ export default function HomePage1() {
         {/* inline navbar for this page */}
         <nav className="absolute top-0 left-0 w-full z-50 bg-gradient-to-r from-amber-50 via-amber-100 to-white backdrop-blur-md border-b border-amber-500/50 shadow-lg">
             <div className="flex justify-between items-center px-6 py-5 md:px-10 md:py-6">
-              <h1 className="text-2xl sm:text-3xl font-bold text-amber-900 drop-shadow-lg">🍴 Golden Essence</h1>
+              <div className="flex items-center gap-2">
+                <UtensilsCrossed className="text-amber-600 hidden sm:block" size={32} />
+                <h1 className="text-2xl sm:text-3xl font-bold text-amber-900 drop-shadow-lg">Golden Essence</h1>
+              </div>
               
               {/* Desktop Menu */}
               <div className="hidden md:flex items-center gap-8">
@@ -355,7 +358,10 @@ export default function HomePage1() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
             {/* About */}
             <div>
-              <h3 className="text-2xl font-bold text-amber-500 mb-4">🍴 Golden Essence</h3>
+              <div className="flex items-center gap-2 mb-4">
+                <UtensilsCrossed className="text-amber-500" size={24} />
+                <h3 className="text-2xl font-bold text-amber-500">Golden Essence</h3>
+              </div>
               <p className="text-gray-300">Experience exquisite dining with traditional recipes and modern ambiance. Your satisfaction is our priority.</p>
             </div>
 
@@ -399,3 +405,4 @@ export default function HomePage1() {
     </div>
   );
 }
+

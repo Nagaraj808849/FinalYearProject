@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+﻿import React, { useState, useEffect } from "react";
 import { LayoutDashboard, ClipboardList, LogOut, User } from "lucide-react";
 import axios from "axios";
 
@@ -40,11 +40,11 @@ export default function UserDash() {
   const fetchOrders = async () => {
     if (!profile.email) return;
     try {
-      const resp = await axios.get(`https://localhost:7080/api/Orders/GetOrders/${profile.email}`);
+      const resp = await axios.get(`http://localhost:7080/api/Orders/GetOrders/${profile.email}`);
       const orders = resp.data;
       setMyOrders(orders);
       
-      const expenseResp = await axios.get(`https://localhost:7080/api/Orders/GetTotalExpense/${profile.email}`);
+      const expenseResp = await axios.get(`http://localhost:7080/api/Orders/GetTotalExpense/${profile.email}`);
       setTotalExpense(expenseResp.data.totalExpense);
     } catch (err) {
       console.error("Failed to load orders", err);
@@ -84,7 +84,7 @@ export default function UserDash() {
     localStorage.setItem("currentUser", JSON.stringify(currentUser));
     localStorage.setItem("profilePhoto", profile.photo);
     
-    setSuccessMessage("Profile Updated Successfully ✅");
+    setSuccessMessage("Profile Updated Successfully \u2705");
     setTimeout(() => setSuccessMessage(""), 3000);
   };
 
@@ -171,17 +171,18 @@ export default function UserDash() {
               Welcome, {profile.name}
             </h2>
 
-            <div className="bg-white rounded-2xl shadow p-6">
+            <div className="bg-white rounded-2xl shadow p-6 max-w-sm">
 
               <h3 className="text-lg font-semibold text-gray-600">
                 My Total Expense
               </h3>
 
-              <p className="text-3xl font-bold text-orange-500 mt-2">
-                ₹{totalExpense}
+              <p className="text-4xl font-bold text-orange-500 mt-2">
+                {"\u20B9"}{totalExpense.toFixed(2)}
               </p>
 
             </div>
+
 
           </div>
 
@@ -223,7 +224,7 @@ export default function UserDash() {
                       </p>
 
                       <p className="text-sm text-gray-600">
-                        Amount: ₹{order.totalAmount}
+                        Amount: {"\u20B9"}{Number(order.totalAmount || 0).toFixed(2)}
                       </p>
 
                     </div>
@@ -342,3 +343,8 @@ export default function UserDash() {
     </div>
   );
 }
+
+
+
+
+
