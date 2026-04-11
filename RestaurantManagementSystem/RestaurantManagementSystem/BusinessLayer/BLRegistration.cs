@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Data;
 using Microsoft.Data.SqlClient;
 using RestaurantManagementSystem.DataLayer;
@@ -178,6 +178,33 @@ namespace RestaurantManagementSystem.BusinessLayer
         }
 
         // =========================
+        // UPDATE PASSWORD (FORGOT PASSWORDV3)
+        // =========================
+        public bool UpdatePassword(string email, string newPassword)
+        {
+            string query = "UPDATE Registration SET Password = @Password WHERE EmailId = @Email";
+
+            SqlParameter[] parameters =
+            {
+                new SqlParameter("@Email", email),
+                new SqlParameter("@Password", newPassword)
+            };
+
+            return _db.ExecuteNonQuery(query, CommandType.Text, parameters) > 0;
+        }
+
+        // =========================
+        // CHECK IF EMAIL EXISTS
+        // =========================
+        public bool CheckEmailExists(string email)
+        {
+            string query = "SELECT COUNT(1) FROM Registration WHERE EmailId = @Email";
+            SqlParameter[] parameters = { new SqlParameter("@Email", email) };
+            DataTable dt = _db.GetDataTable(query, CommandType.Text, parameters);
+            return dt.Rows.Count > 0 && Convert.ToInt32(dt.Rows[0][0]) > 0;
+        }
+
+        // =========================
         // USER LOGIN
         // =========================
         public RegistrationClass ValidateLogin(LoginClass login)
@@ -226,7 +253,7 @@ namespace RestaurantManagementSystem.BusinessLayer
 
             var claims = new[]
             {
-                new Claim(ClaimTypes.Name, user.EmailId),
+                new Claim(ClaimTypes.Name, user.EmailId ?? string.Empty),
                 new Claim(ClaimTypes.Role, user.Role.ToString()),
                 new Claim("UserId", user.UserId.ToString())
             };

@@ -62,8 +62,8 @@ namespace RestaurantManagementSystem.BusinessLayer
 
             SqlParameter[] parameters =
             {
-                new SqlParameter("@UserName", reservation.UserName),
-                new SqlParameter("@UserEmail", reservation.UserEmail),
+                new SqlParameter("@UserName", reservation.UserName ?? (object)DBNull.Value),
+                new SqlParameter("@UserEmail", reservation.UserEmail ?? (object)DBNull.Value),
                 new SqlParameter("@ReservationDateTime", reservation.ReservationDateTime),
                 new SqlParameter("@NoOfPeople", reservation.NoOfPeople),
                 new SqlParameter("@SpecialAttentions", reservation.SpecialAttentions ?? (object)DBNull.Value),
@@ -92,11 +92,11 @@ namespace RestaurantManagementSystem.BusinessLayer
                 {
                     ReservationId = Convert.ToInt32(dr["ReservationId"]),
                     UserId = dr["UserId"] != DBNull.Value ? Convert.ToInt32(dr["UserId"]) : (int?)null,
-                    UserName = dr["UserName"].ToString(),
-                    UserEmail = dr["UserEmail"].ToString(),
+                    UserName = dr["UserName"]?.ToString() ?? string.Empty,
+                    UserEmail = dr["UserEmail"]?.ToString() ?? string.Empty,
                     ReservationDateTime = Convert.ToDateTime(dr["ReservationDateTime"]),
                     NoOfPeople = Convert.ToInt32(dr["NoOfPeople"]),
-                    SpecialAttentions = dr["SpecialAttentions"].ToString()
+                    SpecialAttentions = dr["SpecialAttentions"]?.ToString() ?? string.Empty
                 });
             }
 

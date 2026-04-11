@@ -206,7 +206,7 @@ export default function Admin() {
     const totalUsers = users.length;
     const totalOrders = orders.length;
     const revenue = orders
-      .filter((o) => o.status === "Delivered")
+      .filter((o) => o.status !== "Cancelled") // Count all paid orders except cancelled ones
       .reduce((s, o) => s + (Number(o.totalAmount) || 0), 0);
     const pending = orders.filter((o) => o.status === "Pending").length;
     return { totalUsers, totalOrders, revenue, pending };

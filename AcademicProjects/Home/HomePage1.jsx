@@ -13,7 +13,7 @@ export default function HomePage1() {
   const scrollRef1 = useRef(null);
   const scrollRef2 = useRef(null);
   const navigate = useNavigate();
-  const { user, logout } = useAuth();
+  const { user, logout, isAdmin } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
@@ -66,7 +66,7 @@ export default function HomePage1() {
   ];
 
   return (
-    <div className="w-full overflow-x-hidden">
+    <div className="w-full overflow-x-hidden scroll-smooth">
     
      
       <section
@@ -125,6 +125,13 @@ export default function HomePage1() {
                             Profile
                           </button>
                         </Link>
+                        {isAdmin && (
+                          <Link to="/Admin">
+                            <button className="block w-full text-left px-4 py-2 hover:bg-amber-100 text-amber-900 font-semibold border-t border-amber-100">
+                              Admin Panel
+                            </button>
+                          </Link>
+                        )}
                         <button
                           onClick={() => {
                             logout();
@@ -237,6 +244,13 @@ export default function HomePage1() {
                         <User size={20}/> Profile
                       </button>
                     </Link>
+                    {isAdmin && (
+                      <Link to="/Admin" onClick={() => setMobileNavOpen(false)}>
+                        <button className="w-full flex items-center gap-3 text-amber-900 font-bold bg-amber-500/10 p-3 rounded-lg transition text-left">
+                          <HelpCircle size={20}/> Admin Dashboard
+                        </button>
+                      </Link>
+                    )}
                     <button
                       onClick={() => {
                         logout();
@@ -353,7 +367,7 @@ export default function HomePage1() {
       </section>
 
       {/* Footer */}
-      <footer className="w-full bg-gray-900 text-white py-12">
+      <footer id="contact" className="w-full bg-gray-900 text-white py-12">
         <div className="max-w-6xl mx-auto px-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
             {/* About */}

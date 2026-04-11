@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Data;
 using Microsoft.Data.SqlClient;
 using RestaurantManagementSystem.DataLayer;
@@ -89,10 +89,10 @@ namespace RestaurantManagementSystem.BusinessLayer
                 {
                     ProfileId = Convert.ToInt32(row["ProfileId"]),
                     UserId = Convert.ToInt32(row["UserId"]),
-                    UserName = row["UserName"].ToString(),
-                    Email = row["Email"].ToString(),
+                    UserName = row["UserName"]?.ToString() ?? string.Empty,
+                    Email = row["Email"]?.ToString() ?? string.Empty,
                     ProfileImage = row["ProfileImage"] as byte[],
-                    UpdatedDate = Convert.ToDateTime(row["UpdatedDate"])
+                    UpdatedDate = row["UpdatedDate"] != DBNull.Value ? Convert.ToDateTime(row["UpdatedDate"]) : DateTime.MinValue
                 };
             }
 

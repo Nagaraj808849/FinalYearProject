@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.SqlClient;
 using RestaurantManagementSystem.DataLayer;
 using System.Data;
 
@@ -35,19 +36,28 @@ namespace RestaurantManagementSystem.Controllers
         [HttpPost("CreateOrder")]
         public IActionResult CreateOrder([FromBody] UserOrder order)
         {
-            string query = $@"
+            string query = @"
                 INSERT INTO UserOrders (Id, UserEmail, Items, TotalAmount, OrderDate, Status)
-                VALUES ('{order.Id}', '{order.UserEmail}', '{order.Items}', {order.TotalAmount}, '{order.OrderDate}', 'Pending')";
+                VALUES (@Id, @UserEmail, @Items, @TotalAmount, @OrderDate, 'Pending')";
             
-            int result = _db.ExecuteOnlyQuery(query);
+            SqlParameter[] parameters = {
+                new SqlParameter("@Id", order.Id),
+                new SqlParameter("@UserEmail", order.UserEmail),
+                new SqlParameter("@Items", order.Items),
+                new SqlParameter("@TotalAmount", order.TotalAmount),
+                new SqlParameter("@OrderDate", order.OrderDate)
+            };
+
+            int result = _db.ExecuteNonQuery(query, CommandType.Text, parameters);
             return Ok(new { message = "Order Created" });
         }
 
         [HttpGet("GetOrders/{email}")]
         public IActionResult GetOrders(string email)
         {
-            string query = $"SELECT * FROM UserOrders WHERE UserEmail = '{email}' ORDER BY OrderDate DESC";
-            DataTable dt = _db.GetDataTable(query);
+            string query = "SELECT * FROM UserOrders WHERE UserEmail = @Email ORDER BY OrderDate DESC";
+            SqlParameter[] parameters = { new SqlParameter("@Email", email) };
+            DataTable dt = _db.GetDataTable(query, CommandType.Text, parameters);
 
             var orders = new List<UserOrder>();
             foreach (DataRow row in dt.Rows)
@@ -92,16 +102,21 @@ namespace RestaurantManagementSystem.Controllers
         [HttpPut("UpdateStatus")]
         public IActionResult UpdateStatus([FromBody] OrderStatusUpdate update)
         {
-            string query = $"UPDATE UserOrders SET Status = '{update.Status}' WHERE Id = '{update.Id}'";
-            _db.ExecuteOnlyQuery(query);
+            string query = "UPDATE UserOrders SET Status = @Status WHERE Id = @Id";
+            SqlParameter[] parameters = {
+                new SqlParameter("@Status", update.Status),
+                new SqlParameter("@Id", update.Id)
+            };
+            _db.ExecuteNonQuery(query, CommandType.Text, parameters);
             return Ok(new { message = "Status Updated" });
         }
 
         [HttpGet("GetTotalExpense/{email}")]
         public IActionResult GetTotalExpense(string email)
         {
-            string query = $"SELECT SUM(TotalAmount) as Total FROM UserOrders WHERE UserEmail = '{email}'";
-            DataTable dt = _db.GetDataTable(query);
+            string query = "SELECT SUM(TotalAmount) as Total FROM UserOrders WHERE UserEmail = @Email AND Status != 'Cancelled'";
+            SqlParameter[] parameters = { new SqlParameter("@Email", email) };
+            DataTable dt = _db.GetDataTable(query, CommandType.Text, parameters);
 
             decimal total = 0;
             if (dt.Rows.Count > 0 && dt.Rows[0]["Total"] != DBNull.Value)
@@ -114,17 +129,17 @@ namespace RestaurantManagementSystem.Controllers
 
     public class UserOrder
     {
-        public string Id { get; set; }
-        public string UserEmail { get; set; }
-        public string Items { get; set; }
+        public string? Id { get; set; }
+        public string? UserEmail { get; set; }
+        public string? Items { get; set; }
         public decimal TotalAmount { get; set; }
-        public string OrderDate { get; set; }
-        public string Status { get; set; }
+        public string? OrderDate { get; set; }
+        public string? Status { get; set; }
     }
 
     public class OrderStatusUpdate
     {
-        public string Id { get; set; }
-        public string Status { get; set; }
+        public string? Id { get; set; }
+        public string? Status { get; set; }
     }
 }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Data;
 using Microsoft.Data.SqlClient;
 using RestaurantManagementSystem.DataLayer;
@@ -40,9 +40,9 @@ namespace RestaurantManagementSystem.BusinessLayer
 
                     return new RegistrationClass
                     {
-                        FirstName = row["FirstName"]?.ToString(),
-                        LastName = row["LastName"]?.ToString(),
-                        EmailId = row["EmailId"]?.ToString()
+                        FirstName = row["FirstName"]?.ToString() ?? string.Empty,
+                        LastName = row["LastName"]?.ToString() ?? string.Empty,
+                        EmailId = row["EmailId"]?.ToString() ?? string.Empty
                     };
                 }
 

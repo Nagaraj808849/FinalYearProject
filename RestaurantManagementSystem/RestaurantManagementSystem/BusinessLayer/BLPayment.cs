@@ -1,4 +1,4 @@
-﻿using System.Data;
+using System.Data;
 using Microsoft.Data.SqlClient;
 using RestaurantManagementSystem.Models;
 using RestaurantManagementSystem.DataLayer;
@@ -20,7 +20,7 @@ namespace RestaurantManagementSystem.BusinessLayer
             {
                 new SqlParameter("@payment_date", payment.payment_date),
                 new SqlParameter("@amount", payment.amount),
-                new SqlParameter("@method", payment.method)
+                new SqlParameter("@method", payment.method ?? (object)DBNull.Value)
             };
 
             return _db.ExecuteNonQuery(

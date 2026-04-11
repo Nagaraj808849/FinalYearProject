@@ -6,6 +6,8 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// ================= SERVICES =================
+
 // Add Controllers
 builder.Services.AddControllers();
 
@@ -16,13 +18,12 @@ builder.Services.AddScoped<BLTableReservation>();
 builder.Services.AddScoped<BLPayment>();
 builder.Services.AddScoped<SqlServerDB>();
 
+// Swagger
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-
-// JWT Secret Key (Must be 32+ characters)
+// JWT Secret Key
 var key = Encoding.UTF8.GetBytes("ThisIsMySuperSecretJwtKeyForRestaurantManagementSystem12345");
-
 
 // JWT Authentication
 builder.Services.AddAuthentication(options =>
@@ -32,7 +33,7 @@ builder.Services.AddAuthentication(options =>
 })
 .AddJwtBearer(options =>
 {
-    options.RequireHttpsMetadata = false;
+    options.RequireHttpsMetadata = false; // important for local dev
 
     options.TokenValidationParameters = new TokenValidationParameters
     {
@@ -40,26 +41,25 @@ builder.Services.AddAuthentication(options =>
         ValidateAudience = false,
         ValidateLifetime = true,
         ValidateIssuerSigningKey = true,
-
         IssuerSigningKey = new SymmetricSecurityKey(key)
     };
 });
 
-
-// CORS Configuration
+// CORS (IMPORTANT FIX)
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("MyCorsPolicy", policy =>
     {
-        policy.AllowAnyOrigin()
+        policy.SetIsOriginAllowed(origin => new Uri(origin).Host == "localhost")
               .AllowAnyHeader()
-              .AllowAnyMethod();
+              .AllowAnyMethod()
+              .AllowCredentials();
     });
 });
 
-
 var app = builder.Build();
 
+// ================= MIDDLEWARE =================
 
 // Swagger
 if (app.Environment.IsDevelopment())
@@ -68,13 +68,13 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+// IMPORTANT: Use HTTP for local to avoid SSL error
+// comment HTTPS if causing ERR_SSL_PROTOCOL_ERROR
+// app.UseHttpsRedirection();
 
-// Middleware
-app.UseHttpsRedirection();
+app.UseCors("MyCorsPolicy");   // MUST be before auth
 
-app.UseCors("MyCorsPolicy");
-
-app.UseAuthentication();   // JWT Authentication
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
