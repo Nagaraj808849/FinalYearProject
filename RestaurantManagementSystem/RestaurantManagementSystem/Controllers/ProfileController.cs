@@ -1,8 +1,9 @@
+using System;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using RestaurantManagementSystem.BusinessLayer;
 using RestaurantManagementSystem.Models;
-using Microsoft.AspNetCore.Http; // Added by instruction
+using Microsoft.AspNetCore.Http;
 
 namespace RestaurantManagementSystem.Controllers
 {
@@ -104,6 +105,33 @@ namespace RestaurantManagementSystem.Controllers
                 return StatusCode(500, new
                 {
                     message = "Server Error",
+                    error = ex.Message
+                });
+            }
+        }
+
+        // =============================
+        // GET FULL IDENTITY (JOIN EXAMPLE)
+        // =============================
+        [HttpGet("GetFullIdentity/{userId}")]
+        public IActionResult GetFullIdentity(int userId)
+        {
+            try
+            {
+                var identity = _blUserProfile.GetFullIdentity(userId);
+
+                if (identity == null)
+                {
+                    return NotFound(new { message = "User record not found" });
+                }
+
+                return Ok(identity);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new
+                {
+                    message = "Join Query Error",
                     error = ex.Message
                 });
             }

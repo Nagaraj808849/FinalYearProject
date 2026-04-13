@@ -1,7 +1,10 @@
+using System;
+using System.Collections.Generic;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using RestaurantManagementSystem.DataLayer;
+using RestaurantManagementSystem.Models;
 using System.Data;
 
 namespace RestaurantManagementSystem.Controllers
@@ -124,6 +127,39 @@ namespace RestaurantManagementSystem.Controllers
                 total = Convert.ToDecimal(dt.Rows[0]["Total"]);
             }
             return Ok(new { totalExpense = total });
+        }
+
+        // =========================
+        // JOIN EXAMPLE: Orders + Users
+        // =========================
+        [Authorize(Roles = "1")]
+        [HttpGet("GetAllOrdersWithUsers")]
+        public IActionResult GetAllOrdersWithUsers()
+        {
+            // JOIN: Linking UserOrders and Registration to get names
+            string query = @"
+                SELECT o.*, (r.FirstName + ' ' + r.LastName) as FullName
+                FROM UserOrders o
+                INNER JOIN Registration r ON o.UserEmail = r.EmailId
+                ORDER BY o.OrderDate DESC";
+
+            DataTable dt = _db.GetDataTable(query);
+
+            var orders = new List<RestaurantManagementSystem.Models.OrderWithUser>();
+            foreach (DataRow row in dt.Rows)
+            {
+                orders.Add(new RestaurantManagementSystem.Models.OrderWithUser
+                {
+                    OrderId = row["Id"].ToString(),
+                    UserEmail = row["UserEmail"].ToString(),
+                    UserFullName = row["FullName"].ToString(),
+                    Items = row["Items"].ToString(),
+                    TotalAmount = Convert.ToDecimal(row["TotalAmount"]),
+                    OrderDate = row["OrderDate"].ToString(),
+                    Status = row["Status"].ToString()
+                });
+            }
+            return Ok(orders);
         }
     }
 

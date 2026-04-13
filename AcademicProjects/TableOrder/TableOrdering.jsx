@@ -1,13 +1,15 @@
-﻿import React from "react";
+import React, { useState } from "react";
 import axios from "axios";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, CheckCircle, Users, Calendar, User, X } from "lucide-react";
 import { useAuth } from "../src/context/useAuth"; // Add useAuth import
 
 const TableOrder = () => {
   const navigate = useNavigate();
   const { user } = useAuth(); // Extract user from AuthContext
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [bookingDetails, setBookingDetails] = useState(null);
 
   const { register, handleSubmit, reset } = useForm();
 
@@ -40,24 +42,49 @@ const TableOrder = () => {
         reservationData
       );
 
-      alert("\u2705 Table booked successfully!");
-      console.log(response.data);
-
+      setBookingDetails(reservationData);
+      setShowSuccess(true);
       reset();
 
     } catch (error) {
       console.error("Reservation Error:", error);
-
-      if (error.response) {
-        alert("Ã¢ÂÅ’ " + JSON.stringify(error.response.data));
-      } else {
-        alert("Ã¢ÂÅ’ Failed to connect to API");
-      }
+      alert("❌ Failed to book table. Please try again.");
     }
   };
 
   return (
     <div className="w-full min-h-screen bg-gradient-to-br from-amber-50 to-white flex flex-col items-center py-10 px-4 relative">
+
+      {/* Success Modal */}
+      {showSuccess && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl relative animate-in fade-in zoom-in duration-300">
+            <button onClick={() => setShowSuccess(false)} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+              <X size={24} />
+            </button>
+            <div className="flex flex-col items-center text-center">
+              <div className="bg-green-100 p-3 rounded-full mb-4">
+                <CheckCircle className="text-green-600" size={48} />
+              </div>
+              <h2 className="text-2xl font-bold text-gray-800 mb-2">Booking Confirmed!</h2>
+              <p className="text-gray-600 mb-6">Your table has been successfully reserved.</p>
+              
+              <div className="w-full bg-gray-50 rounded-xl p-4 text-left space-y-3">
+                <div className="flex items-center gap-3 text-gray-700"><User size={18} /> {bookingDetails?.UserName}</div>
+                <div className="flex items-center gap-3 text-gray-700"><Calendar size={18} /> {new Date(bookingDetails?.ReservationDateTime).toLocaleString()}</div>
+                <div className="flex items-center gap-3 text-gray-700"><Users size={18} /> {bookingDetails?.NoOfPeople} People</div>
+              </div>
+              
+              <button 
+                onClick={() => setShowSuccess(false)}
+                className="mt-6 w-full py-3 bg-amber-600 text-white rounded-lg font-semibold hover:bg-amber-700 transition-colors"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Back Button */}
       <button

@@ -17,10 +17,10 @@ namespace RestaurantManagementSystem.Controllers
         // In-memory OTP storage: Email -> (Code, Expiry)
         private static readonly Dictionary<string, (string Code, DateTime Expiry)> _otpStore = new();
 
-        public ForgotPasswordController(IConfiguration config)
+        public ForgotPasswordController(IConfiguration config, BLRegistration bl)
         {
             _config = config;
-            _bl = new BLRegistration(new SqlServerDB());
+            _bl = bl;
         }
 
         [HttpPost("send-otp")]
@@ -47,59 +47,71 @@ namespace RestaurantManagementSystem.Controllers
                 string senderEmail = emailSettings["SenderEmail"] ?? "";
                 string appPassword = emailSettings["AppPassword"] ?? "";
 
-                bool isPlaceholder = string.IsNullOrEmpty(senderEmail) || string.IsNullOrEmpty(appPassword) || 
-                                     senderEmail == "your-gmail@gmail.com" || appPassword == "your-app-password";
+                // Aggressive placeholder check (Case-Insensitive)
+                string emailUpper = (senderEmail ?? "").ToUpper();
+                string passUpper = (appPassword ?? "").ToUpper();
+
+                bool isPlaceholder = string.IsNullOrWhiteSpace(senderEmail) || 
+                                     emailUpper.Contains("YOUR_GMAIL") || 
+                                     passUpper.Contains("YOUR_16_DIGIT") ||
+                                     emailUpper.Contains("EXAMPLE.COM");
+
+                Console.WriteLine($"\n[OTP SYSTEM]: Checking Configuration...");
+                Console.WriteLine($"[OTP SYSTEM]: Sender: {senderEmail}");
+                Console.WriteLine($"[OTP SYSTEM]: Is Developer Mode: {isPlaceholder}\n");
 
                 if (isPlaceholder)
                 {
-                    Console.WriteLine("\n************************************************************");
-                    Console.WriteLine($"[DEVELOPMENT MODE - OTP]: {otpCode}");
-                    Console.WriteLine($"[TO EMAIL]: {request.Email}");
-                    Console.WriteLine("Note: Real email was NOT sent because credentials are placeholders.");
-                    Console.WriteLine("************************************************************\n");
+                    // For local development, still log to console
+                    Console.WriteLine("\n[DEV MODE]: Credentials not configured. Use the code below:");
+                    Console.WriteLine($"OTP: {otpCode} for {request.Email}\n");
 
                     return Ok(new { 
-                        message = "OTP generated (DEVELOPMENT MODE). Check the server terminal/console for the 6-digit code.",
+                        message = "OTP has been successfully generated. (DEVELOPMENT MODE: Check the backend console for the 6-digit code)\n\n" +
+                                  "If you do not receive the OTP, please ensure that your email address is correct. " +
+                                  "In case of continued issues, the system administrator should verify that SMTP (Gmail) email settings are properly configured.\n\n" +
+                                  "Thank you for your patience.",
                         isDevMode = true 
                     });
                 }
 
-                // Send Email via Gmail SMTP
-                var fromAddress = new MailAddress(senderEmail, "Golden Essence Restaurant");
-                var toAddress = new MailAddress(request.Email);
-                const string subject = "Your Golden Essence Password Reset OTP";
-                string body = $"Hello,\n\nYour OTP for password reset is: {otpCode}\n\nThis code expires in 10 minutes.\n\nThank you,\nGolden Essence Restaurant";
+                // Send Real Email via SMTP
+                using (var smtp = new SmtpClient(smtpServer, smtpPort))
+                {
+                    smtp.EnableSsl = true;
+                    smtp.Credentials = new NetworkCredential(senderEmail, appPassword);
+                    smtp.Timeout = 10000; // 10s timeout
 
-                var smtp = new SmtpClient
-                {
-                    Host = smtpServer,
-                    Port = smtpPort,
-                    EnableSsl = true,
-                    DeliveryMethod = SmtpDeliveryMethod.Network,
-                    UseDefaultCredentials = false,
-                    Credentials = new NetworkCredential(senderEmail, appPassword)
-                };
+                    var mailMessage = new MailMessage
+                    {
+                        From = new MailAddress(senderEmail, "Golden Essence Restaurant"),
+                        Subject = "Your Password Reset OTP",
+                        Body = $"Hello,\n\nYour One-Time Password (OTP) for resetting your password is: {otpCode}\n\nThis code is valid for 10 minutes.\n\nThank you,\nGolden Essence Team",
+                        IsBodyHtml = false
+                    };
+                    mailMessage.To.Add(request.Email);
 
-                using (var message = new MailMessage(fromAddress, toAddress)
-                {
-                    Subject = subject,
-                    Body = body
-                })
-                {
-                    // Print to terminal for developer visibility
-                    Console.WriteLine($"\n[OTP DEBUG]: Sending {otpCode} to {request.Email}\n");
-                    
-                    smtp.Send(message);
-                    return Ok(new { message = "OTP sent to your email successfully" });
+                    smtp.Send(mailMessage);
+                    return Ok(new { 
+                        message = "OTP has been successfully generated and will be sent to your registered email address.\n\n" +
+                                  "If you do not receive the OTP, please ensure that your email address is correct and check your Spam/Junk folder. " +
+                                  "In case of continued issues, the system administrator should verify that SMTP (Gmail) email settings are properly configured to enable email delivery.\n\n" +
+                                  "Thank you for your patience." 
+                    });
                 }
+            }
+            catch (SmtpException smtpEx)
+            {
+                return StatusCode(500, new { 
+                    message = "Gmail SMTP error. Authentication failed or port 587 is blocked.",
+                    error = smtpEx.Message 
+                });
             }
             catch (Exception ex)
             {
-                // Detailed ERROR message for UI
-                string errorDetail = ex.InnerException?.Message ?? ex.Message;
                 return StatusCode(500, new { 
-                    message = "Gmail SMTP error. Ensure you are using an 'App Password' and port 587 is open.",
-                    error = errorDetail 
+                    message = "Failed to send OTP. Unexpected error occurred.",
+                    error = ex.Message 
                 });
             }
         }

@@ -10,6 +10,16 @@ export default function Admin() {
   const { logout } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [menu, setMenu] = useState([]);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  const handleLogout = () => {
+    setIsLoggingOut(true);
+    setTimeout(() => {
+      logout();
+      navigate("/Login");
+    }, 1500);
+  };
 
   const [view, setView] = useState("Dashboard");
   const [newSpecial, setNewSpecial] = useState({ name: "", price: "" });
@@ -300,20 +310,52 @@ export default function Admin() {
             </button>
           </nav>
 
-          <div className="mt-8 pt-6 border-t border-amber-700">
-            <button
-              onClick={() => {
-                if (window.confirm("Are you sure you want to logout?")) {
-                  logout();
-                  navigate("/Login");
-                }
-              }}
-              className="w-full bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-semibold transition flex items-center justify-center gap-2"
-            >
-              <LogOut size={18} /> Logout
-            </button>
-          </div>
+          <button 
+            onClick={() => setShowLogoutModal(true)}
+            className="mt-auto w-full flex items-center gap-3 px-4 py-3 rounded-lg text-amber-100 hover:bg-amber-700 transition font-medium"
+          >
+            <LogOut size={20} />
+            Logout
+          </button>
         </aside>
+
+        {/* Logout Confirmation Modal */}
+        {showLogoutModal && (
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+            <div className="bg-white rounded-2xl p-8 max-w-sm w-full shadow-2xl animate-in fade-in zoom-in duration-300 text-center">
+              {isLoggingOut ? (
+                <div className="py-6 flex flex-col items-center">
+                  <div className="w-16 h-16 border-4 border-amber-200 border-t-amber-600 rounded-full animate-spin mb-4"></div>
+                  <h3 className="text-xl font-bold text-amber-900">Logging out...</h3>
+                  <p className="text-gray-500">Securing your session. Please wait.</p>
+                </div>
+              ) : (
+                <>
+                  <div className="bg-red-50 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <LogOut size={40} className="text-red-500" />
+                  </div>
+                  <h3 className="text-2xl font-bold text-gray-900 mb-2">Confirm Logout</h3>
+                  <p className="text-gray-500 mb-8">Are you sure you want to exit the admin panel? Any unsaved changes may be lost.</p>
+                  
+                  <div className="flex flex-col gap-3">
+                    <button 
+                      onClick={handleLogout}
+                      className="w-full py-3 bg-red-600 text-white rounded-xl font-bold hover:bg-red-700 transition-all shadow-lg active:scale-95"
+                    >
+                      Yes, Logout
+                    </button>
+                    <button 
+                      onClick={() => setShowLogoutModal(false)}
+                      className="w-full py-3 bg-gray-100 text-gray-600 rounded-xl font-bold hover:bg-gray-200 transition-all"
+                    >
+                      Stay Logged In
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Main Content */}
         <main className="flex-1 p-4 sm:p-8 overflow-auto w-full md:w-auto">

@@ -42,8 +42,11 @@ const Login = () => {
     e.preventDefault();
     setForgotLoading(true);
     try {
-      const resp = await axios.post("http://localhost:7080/api/ForgotPassword/send-otp", { email: forgotEmail });
-      setForgotMessage({ text: "OTP sent to your email!", type: "success" });
+      const response = await axios.post("http://localhost:7080/api/ForgotPassword/send-otp", { email: forgotEmail });
+      setForgotMessage({ 
+        text: response.data.message || "OTP sent to your email!", 
+        type: "success" 
+      });
       setForgotStep(2);
     } catch (err) {
       const errorMessage = err.response?.data?.message || "Failed to send OTP. Please check your connection.";
@@ -95,6 +98,8 @@ const Login = () => {
     setError("");
   };
 
+  const [showLoginSuccess, setShowLoginSuccess] = useState(false);
+
   // Handle form submit
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -103,7 +108,7 @@ const Login = () => {
 
     try {
       const response = await axios.post(
-        "http://localhost:7080/api/Login/Login", 
+        "http://localhost:7080/api/Login/Login",
         loginData,
         { headers: { "Content-Type": "application/json" } }
       );
@@ -111,13 +116,18 @@ const Login = () => {
       const data = response.data;
       login(data);
 
+      setShowLoginSuccess(true);
+
       const numericRole = data.role === 1 || String(data.role) === "1" || String(data.role).toLowerCase() === "admin" ? 1 : 2;
 
-      if (numericRole === 1) {
-        navigate("/Admin");
-      } else {
-        navigate("/Homepage1");
-      }
+      // DELAY FOR ANIMATION
+      setTimeout(() => {
+        if (numericRole === 1) {
+          navigate("/Admin");
+        } else {
+          navigate("/Homepage1");
+        }
+      }, 1500);
 
     } catch (err) {
       console.error("Login Error:", err);
@@ -131,7 +141,25 @@ const Login = () => {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-gradient-to-br from-amber-50 to-white">
+    <div className="flex flex-col min-h-screen bg-gradient-to-br from-amber-50 to-white overflow-hidden">
+      
+      {/* Sticky Success Notification */}
+      {showLoginSuccess && (
+        <div className="fixed top-6 left-1/2 z-[100] w-full max-w-sm px-4 animate-sticky-success">
+          <div className="bg-emerald-600/95 backdrop-blur-md text-white shadow-2xl rounded-2xl p-4 flex items-center gap-4 border border-emerald-400/30">
+            <div className="flex-shrink-0 w-12 h-12 bg-white/20 rounded-full flex items-center justify-center animate-pulse">
+              <span className="text-2xl font-bold">✓</span>
+            </div>
+            <div>
+              <h3 className="font-bold text-lg leading-tight">Login Successful!</h3>
+              <p className="text-emerald-50 text-xs font-medium">Redirecting to your dashboard...</p>
+            </div>
+            <div className="ml-auto w-1 h-12 bg-white/20 rounded-full overflow-hidden">
+              <div className="h-full bg-white animate-progress-shrink"></div>
+            </div>
+          </div>
+        </div>
+      )}
       <div className="flex justify-center items-center flex-1">
 
         <div className="w-[850px] h-[540px] flex rounded-lg shadow-2xl border border-amber-400 overflow-hidden">
@@ -213,9 +241,9 @@ const Login = () => {
 
           {/* RIGHT SIDE */}
           <div className="w-1/2 bg-gradient-to-br from-amber-500 to-amber-600 text-white flex flex-col justify-center items-center p-8 text-center">
-             <div className="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center mb-6 backdrop-blur-sm shadow-xl">
-                 <FaLock size={32} className="text-white" />
-             </div>
+            <div className="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center mb-6 backdrop-blur-sm shadow-xl">
+              <FaLock size={32} className="text-white" />
+            </div>
             <h2 className="text-3xl font-extrabold mb-4">WELCOME BACK</h2>
             <p className="text-amber-50 text-sm leading-relaxed max-w-xs">
               Sign in to manage your orders and experience the taste of prestige at Golden Essence Restaurant.
@@ -240,13 +268,13 @@ const Login = () => {
 
             {/* Step Indicators */}
             <div className="flex gap-2 mb-8">
-                {[1, 2, 3].map(s => (
-                    <div key={s} className={`h-1 flex-1 rounded-full ${forgotStep >= s ? 'bg-amber-500' : 'bg-gray-200'}`}></div>
-                ))}
+              {[1, 2, 3].map(s => (
+                <div key={s} className={`h-1 flex-1 rounded-full ${forgotStep >= s ? 'bg-amber-500' : 'bg-gray-200'}`}></div>
+              ))}
             </div>
 
             {forgotMessage.text && (
-              <div className={`p-4 rounded-lg mb-6 text-sm font-semibold text-center border ${forgotMessage.type === 'success' ? 'bg-green-50 text-green-700 border-green-200' : 'bg-red-50 text-red-700 border-red-200'}`}>
+              <div className={`p-4 rounded-xl mb-6 text-sm font-semibold text-center border whitespace-pre-line animate-in fade-in slide-in-from-top-2 duration-300 ${forgotMessage.type === 'success' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-rose-50 text-rose-700 border-rose-200'}`}>
                 {forgotMessage.text}
               </div>
             )}
@@ -254,25 +282,33 @@ const Login = () => {
             {/* Step 1: Email */}
             {forgotStep === 1 && (
               <form onSubmit={handleRequestOtp} className="space-y-6">
-                <p className="text-gray-600 text-sm leading-relaxed text-center">
-                  Enter your email address and we'll send a 6-digit OTP to reset your password.
-                </p>
-                <div className="relative">
+                <div className="text-center space-y-2">
+                  <p className="text-gray-600 text-sm leading-relaxed">
+                    Enter your email address and we'll send a 6-digit OTP to reset your password.
+                  </p>
+                </div>
+                <div className="relative group">
                   <input
                     type="email"
                     required
                     placeholder="name@gmail.com"
                     value={forgotEmail}
                     onChange={(e) => setForgotEmail(e.target.value)}
-                    className="w-full py-3 border-b-2 border-amber-200 focus:border-amber-500 focus:outline-none transition-all text-lg"
+                    className="w-full py-3 border-b-2 border-amber-200 focus:border-amber-500 focus:outline-none transition-all text-lg group-hover:border-amber-300"
                   />
+                  <FaEnvelope className="absolute right-2 top-4 text-amber-400 group-hover:text-amber-500 transition-colors" />
                 </div>
                 <button
                   type="submit"
                   disabled={forgotLoading}
-                  className="w-full py-3 rounded-xl bg-amber-600 text-white font-bold hover:bg-amber-700 transition-all shadow-lg active:scale-95"
+                  className="w-full py-3.5 rounded-xl bg-gradient-to-r from-amber-600 to-amber-700 text-white font-bold hover:from-amber-700 hover:to-amber-800 transition-all shadow-lg active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
                 >
-                  {forgotLoading ? "Sending OTP..." : "Get Verification Code"}
+                  {forgotLoading ? (
+                    <span className="flex items-center justify-center gap-2">
+                      <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+                      Sending Code...
+                    </span>
+                  ) : "Get Verification Code"}
                 </button>
               </form>
             )}
@@ -280,61 +316,90 @@ const Login = () => {
             {/* Step 2: OTP */}
             {forgotStep === 2 && (
               <form onSubmit={handleVerifyOtp} className="space-y-6">
-                <p className="text-gray-600 text-sm leading-relaxed text-center">
-                  Check your Gmail for the 6-digit code.
-                </p>
-                <div>
+                <div className="text-center space-y-2">
+                  <p className="text-gray-600 text-sm leading-relaxed">
+                    Check your <span className="font-bold text-amber-900">Gmail</span> for the 6-digit code.
+                  </p>
+                  <p className="text-xs text-amber-600 font-medium italic">Sent to: {forgotEmail}</p>
+                </div>
+                <div className="flex justify-center">
                   <input
                     type="text"
                     required
                     maxLength={6}
-                    placeholder="123456"
+                    placeholder="000000"
                     value={otp}
-                    onChange={(e) => setOtp(e.target.value)}
-                    className="w-full py-3 border-b-2 border-amber-200 focus:border-amber-500 focus:outline-none transition-all text-center text-3xl tracking-[12px] font-bold"
+                    onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
+                    className="w-full py-4 border-2 border-amber-100 rounded-xl focus:border-amber-500 focus:outline-none transition-all text-center text-4xl tracking-[8px] font-black text-amber-900 placeholder:text-gray-200 bg-amber-50/30"
                   />
                 </div>
                 <button
                   type="submit"
                   disabled={forgotLoading}
-                  className="w-full py-3 rounded-xl bg-amber-600 text-white font-bold hover:bg-amber-700 transition-all shadow-lg active:scale-95"
+                  className="w-full py-3.5 rounded-xl bg-amber-600 text-white font-bold hover:bg-amber-700 transition-all shadow-lg active:scale-[0.98] disabled:opacity-70"
                 >
                   {forgotLoading ? "Verifying..." : "Verify OTP"}
                 </button>
-                <button onClick={() => setForgotStep(1)} className="w-full text-sm text-amber-700 hover:underline">Resend code</button>
+                <div className="flex flex-col items-center gap-3">
+                  <button 
+                    type="button"
+                    onClick={() => {
+                      setForgotStep(1);
+                      setForgotMessage({ text: "", type: "" });
+                    }} 
+                    className="text-sm text-gray-500 hover:text-amber-700 hover:underline transition-colors"
+                  >
+                    Change Email
+                  </button>
+                  <button 
+                    type="button"
+                    onClick={handleRequestOtp} 
+                    className="text-xs font-bold text-amber-700 uppercase tracking-widest hover:text-amber-900 transition-colors"
+                  >
+                    Resend Code
+                  </button>
+                </div>
               </form>
             )}
 
             {/* Step 3: Password */}
             {forgotStep === 3 && (
               <form onSubmit={handleResetPassword} className="space-y-6">
-                <p className="text-gray-600 text-sm leading-relaxed text-center">
-                  Create a strong new password that you haven't used before.
-                </p>
+                <div className="text-center space-y-2">
+                  <p className="text-gray-600 text-sm leading-relaxed">
+                    Create a strong new password to secure your account.
+                  </p>
+                </div>
                 <div className="space-y-4">
-                  <input
-                    type="password"
-                    required
-                    placeholder="New Password"
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                    className="w-full py-3 border-b-2 border-amber-200 focus:border-amber-500 focus:outline-none transition-all"
-                  />
-                  <input
-                    type="password"
-                    required
-                    placeholder="Confirm New Password"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="w-full py-3 border-b-2 border-amber-200 focus:border-amber-500 focus:outline-none transition-all"
-                  />
+                  <div className="relative group">
+                    <input
+                      type="password"
+                      required
+                      placeholder="New Password"
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      className="w-full py-3 border-b-2 border-amber-200 focus:border-amber-500 focus:outline-none transition-all pr-10"
+                    />
+                    <FaLock className="absolute right-2 top-4 text-amber-400" />
+                  </div>
+                  <div className="relative group">
+                    <input
+                      type="password"
+                      required
+                      placeholder="Confirm New Password"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      className="w-full py-3 border-b-2 border-amber-200 focus:border-amber-500 focus:outline-none transition-all pr-10"
+                    />
+                    <FaLock className="absolute right-2 top-4 text-amber-400" />
+                  </div>
                 </div>
                 <button
                   type="submit"
                   disabled={forgotLoading}
-                  className="w-full py-3 rounded-xl bg-amber-600 text-white font-bold hover:bg-amber-700 transition-all shadow-lg active:scale-95"
+                  className="w-full py-3.5 rounded-xl bg-amber-600 text-white font-bold hover:bg-amber-700 transition-all shadow-lg active:scale-[0.98] disabled:opacity-70"
                 >
-                  {forgotLoading ? "Resetting..." : "Update Password"}
+                  {forgotLoading ? "Updating..." : "Update Password"}
                 </button>
               </form>
             )}

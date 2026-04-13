@@ -98,5 +98,41 @@ namespace RestaurantManagementSystem.BusinessLayer
 
             return null;
         }
+
+        // =========================
+        // GET FULL IDENTITY (JOIN EXAMPLE)
+        // =========================
+        public UserFullIdentity GetFullIdentity(int userId)
+        {
+            // JOIN: Linking Registration (Account) and UserProfile (Bio/Image)
+            string query = @"
+                SELECT r.UserId, r.FirstName, r.LastName, r.EmailId, r.Role, 
+                       p.UserName as ProfileUserName, p.ProfileImage, p.UpdatedDate
+                FROM Registration r
+                LEFT JOIN UserProfile p ON r.UserId = p.UserId
+                WHERE r.UserId = @UserId";
+
+            SqlParameter[] parameters = { new SqlParameter("@UserId", userId) };
+
+            DataTable dt = _db.GetDataTable(query, CommandType.Text, parameters);
+
+            if (dt.Rows.Count > 0)
+            {
+                DataRow row = dt.Rows[0];
+                return new UserFullIdentity
+                {
+                    UserId = Convert.ToInt32(row["UserId"]),
+                    FirstName = row["FirstName"]?.ToString(),
+                    LastName = row["LastName"]?.ToString(),
+                    EmailId = row["EmailId"]?.ToString(),
+                    Role = Convert.ToInt32(row["Role"]),
+                    ProfileUserName = row["ProfileUserName"]?.ToString(),
+                    ProfileImage = row["ProfileImage"] as byte[],
+                    ProfileUpdatedDate = row["UpdatedDate"] != DBNull.Value ? Convert.ToDateTime(row["UpdatedDate"]) : DateTime.MinValue
+                };
+            }
+
+            return null;
+        }
     }
 }
