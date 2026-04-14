@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+﻿import React, { useState, useEffect, useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { BarChart3, Users, ShoppingCart, TrendingUp, Settings, LogOut, Menu as MenuIcon, X, PlusCircle, ClipboardList } from "lucide-react";
 import { useAuth } from "../src/context/useAuth";
@@ -924,7 +924,7 @@ export default function Admin() {
                   </div>
                   <div className="border-b border-amber-200 pb-3 sm:pb-4">
                     <label className="block text-amber-900 font-semibold mb-1 sm:mb-2 text-sm sm:text-base">Phone Number</label>
-                    <p className="text-base sm:text-lg text-gray-700">+91 98765 43210</p>
+                    <p className="text-base sm:text-lg text-gray-700">+91 8088493860</p>
                   </div>
                   <div className="pb-4">
                     <label className="block text-amber-900 font-semibold mb-1 sm:mb-2 text-sm sm:text-base">Location</label>
