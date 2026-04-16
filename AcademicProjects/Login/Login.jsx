@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { FaEnvelope, FaLock } from "react-icons/fa";
 import axios from "axios";
 import { useAuth } from "../src/context/useAuth";
+import { API_ENDPOINTS } from "../src/config";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -42,7 +43,7 @@ const Login = () => {
     e.preventDefault();
     setForgotLoading(true);
     try {
-      const response = await axios.post("http://localhost:7080/api/ForgotPassword/send-otp", { email: forgotEmail });
+      const response = await axios.post(API_ENDPOINTS.FORGOT_PASSWORD.SEND_OTP, { email: forgotEmail });
       setForgotMessage({ 
         text: response.data.message || "OTP sent to your email!", 
         type: "success" 
@@ -60,7 +61,7 @@ const Login = () => {
     e.preventDefault();
     setForgotLoading(true);
     try {
-      await axios.post("http://localhost:7080/api/ForgotPassword/verify-otp", { email: forgotEmail, otp });
+      await axios.post(API_ENDPOINTS.FORGOT_PASSWORD.VERIFY_OTP, { email: forgotEmail, otp });
       setForgotMessage({ text: "OTP verified! Please set a new password.", type: "success" });
       setForgotStep(3);
     } catch (err) {
@@ -78,7 +79,7 @@ const Login = () => {
     }
     setForgotLoading(true);
     try {
-      await axios.post("http://localhost:7080/api/ForgotPassword/reset-password", {
+      await axios.post(API_ENDPOINTS.FORGOT_PASSWORD.RESET_PASSWORD, {
         email: forgotEmail,
         otp,
         newPassword
@@ -108,7 +109,7 @@ const Login = () => {
 
     try {
       const response = await axios.post(
-        "http://localhost:7080/api/Login/Login",
+        API_ENDPOINTS.LOGIN,
         loginData,
         { headers: { "Content-Type": "application/json" } }
       );

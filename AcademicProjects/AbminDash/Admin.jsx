@@ -1,8 +1,9 @@
-﻿import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { BarChart3, Users, ShoppingCart, TrendingUp, Settings, LogOut, Menu as MenuIcon, X, PlusCircle, ClipboardList } from "lucide-react";
 import { useAuth } from "../src/context/useAuth";
 import axios from "axios";
+import { API_ENDPOINTS } from "../src/config";
 
 
 export default function Admin() {
@@ -46,7 +47,7 @@ export default function Admin() {
 
   const fetchMenu = async () => {
     try {
-      const response = await axios.get("http://localhost:7080/api/Menu");
+      const response = await axios.get(API_ENDPOINTS.MENU);
       setMenu(response.data);
     } catch (err) {
       console.error("Failed to fetch menu:", err);
@@ -55,7 +56,7 @@ export default function Admin() {
 
   const fetchOrders = async () => {
     try {
-      const response = await axios.get("http://localhost:7080/api/Orders/GetAllOrders");
+      const response = await axios.get(API_ENDPOINTS.GET_ALL_ORDERS);
       setOrders(response.data);
     } catch (err) {
       console.error("Failed to fetch orders:", err);
@@ -64,7 +65,7 @@ export default function Admin() {
 
   const fetchReservations = async () => {
     try {
-      const response = await axios.get("http://localhost:7080/api/TableReservation/GetAllReservations");
+      const response = await axios.get(API_ENDPOINTS.GET_ALL_RESERVATIONS);
       setReservations(response.data);
     } catch (err) {
       console.error("Failed to fetch reservations:", err);
@@ -79,7 +80,7 @@ export default function Admin() {
 
   const fetchUsers = async () => {
     try {
-      const response = await axios.get("http://localhost:7080/api/Registration/GetRegisters");
+      const response = await axios.get(API_ENDPOINTS.GET_REGISTERS);
 
       const mappedUsers = response.data.map((u) => ({
         id: u.userId,
@@ -126,7 +127,7 @@ export default function Admin() {
   const removeUser = async (userId) => {
     if (!confirm(`Remove user? This cannot be undone.`)) return;
     try {
-      await axios.delete(`http://localhost:7080/api/Registration/DeleteRegister/${userId}`);
+      await axios.delete(API_ENDPOINTS.DELETE_REGISTER(userId));
       fetchUsers();
     } catch (err) {
       console.error(err);
@@ -136,7 +137,7 @@ export default function Admin() {
 
   const updateOrderStatus = async (orderId, newStatus) => {
     try {
-      await axios.put("http://localhost:7080/api/Orders/UpdateStatus", {
+      await axios.put(API_ENDPOINTS.UPDATE_ORDER_STATUS, {
         Id: orderId,
         Status: newStatus
       });
@@ -181,7 +182,7 @@ export default function Admin() {
         image: newMenuData.image,
         is_available: newMenuData.is_available
       };
-      const response = await axios.post("http://localhost:7080/api/Menu/AddMenuItem", payload, {
+      const response = await axios.post(API_ENDPOINTS.ADD_MENU_ITEM, payload, {
         headers: { "Content-Type": "application/json" }
       });
       setMenuMessage({ text: "Menu item created successfully!", type: "success" });
@@ -590,7 +591,7 @@ export default function Admin() {
                                 onClick={async () => {
                                   if (confirm(`Delete ${item.item_name}?`)) {
                                     try {
-                                      await axios.delete(`http://localhost:7080/api/Menu/DeleteMenuItem/${item.menu_id}`);
+                                      await axios.delete(API_ENDPOINTS.DELETE_MENU_ITEM(item.menu_id));
                                       fetchMenu();
                                     } catch (err) {
                                       console.error(err);

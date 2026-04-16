@@ -1,7 +1,8 @@
-﻿import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { ShoppingCart, CheckCircle, ArrowLeft } from "lucide-react";
 import axios from "axios";
+import { API_ENDPOINTS } from "../src/config";
 
 export default function MenuPage() {
   const [menuItems, setMenuItems] = useState([]);
@@ -19,7 +20,7 @@ export default function MenuPage() {
   useEffect(() => {
     const fetchMenu = async () => {
       try {
-        const response = await axios.get("http://localhost:7080/api/Menu");
+        const response = await axios.get(API_ENDPOINTS.MENU);
 
         const categoryMap = {
           1: "Starters",

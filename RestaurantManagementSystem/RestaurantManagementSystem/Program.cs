@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using RestaurantManagementSystem.BusinessLayer;
 using RestaurantManagementSystem.DataLayer;
@@ -62,11 +62,8 @@ var app = builder.Build();
 // ================= MIDDLEWARE =================
 
 // Swagger
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+app.UseSwagger();
+app.UseSwaggerUI();
 
 // IMPORTANT: Use HTTP for local to avoid SSL error
 // comment HTTPS if causing ERR_SSL_PROTOCOL_ERROR

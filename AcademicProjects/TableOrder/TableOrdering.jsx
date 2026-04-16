@@ -3,7 +3,8 @@ import axios from "axios";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, CheckCircle, Users, Calendar, User, X } from "lucide-react";
-import { useAuth } from "../src/context/useAuth"; // Add useAuth import
+import { useAuth } from "../src/context/useAuth"; 
+import { API_ENDPOINTS } from "../src/config";
 
 const TableOrder = () => {
   const navigate = useNavigate();
@@ -38,7 +39,7 @@ const TableOrder = () => {
       console.log("Sending Data:", reservationData);
 
       const response = await axios.post(
-        "http://localhost:7080/api/TableReservation/BookTable",
+        API_ENDPOINTS.BOOK_TABLE,
         reservationData
       );
 

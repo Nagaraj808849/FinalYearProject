@@ -1,7 +1,8 @@
-﻿import React, { useState } from "react";
+import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { FaUser, FaEnvelope, FaLock } from "react-icons/fa";
 import axios from "axios";
+import { API_ENDPOINTS } from "../src/config";
 
 const Signup = () => {
   const navigate = useNavigate();
@@ -49,7 +50,7 @@ const Signup = () => {
 
     try {
       const response = await axios.post(
-        "http://localhost:7080/api/Registration/InsertRegisters",
+        API_ENDPOINTS.SIGNUP,
 
         {
           "firstName": formData.firstName,

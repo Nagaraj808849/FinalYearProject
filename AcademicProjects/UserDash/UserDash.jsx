@@ -14,6 +14,7 @@ import {
   Home
 } from "lucide-react";
 import axios from "axios";
+import { API_ENDPOINTS } from "../src/config";
 
 export default function UserDash() {
   const [active, setActive] = useState("profile");
@@ -55,9 +56,9 @@ export default function UserDash() {
   const fetchOrders = async () => {
     if (!profile.email) return;
     try {
-      const resp = await axios.get(`http://localhost:7080/api/Orders/GetOrders/${profile.email}`);
+      const resp = await axios.get(API_ENDPOINTS.GET_ORDERS(profile.email));
       setMyOrders(resp.data);
-      const expenseResp = await axios.get(`http://localhost:7080/api/Orders/GetTotalExpense/${profile.email}`);
+      const expenseResp = await axios.get(API_ENDPOINTS.GET_TOTAL_EXPENSE(profile.email));
       setTotalExpense(expenseResp.data?.totalExpense || 0);
     } catch (err) {
       console.error("Failed to load orders", err);

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { API_ENDPOINTS } from "../src/config";
 import { CreditCard, Wallet, Apple, Landmark, CheckCircle, ChevronRight, X, UtensilsCrossed } from "lucide-react";
 import { FaGooglePay } from "react-icons/fa";
 
@@ -13,7 +14,7 @@ export default function PaymentPage() {
   const [paymentMethod, setPaymentMethod] = useState("card");
 
   // API URL
-  const API_URL = "http://localhost:7080/api/Payment";
+  const API_URL = API_ENDPOINTS.PAYMENT;
 
   // Load cart
   useEffect(() => {
@@ -72,7 +73,7 @@ export default function PaymentPage() {
       };
 
       try {
-        await axios.post("http://localhost:7080/api/Orders/CreateOrder", newOrder);
+        await axios.post(API_ENDPOINTS.CREATE_ORDER, newOrder);
       } catch (orderErr) {
         console.error("Order API Error:", orderErr);
       }
