@@ -1,7 +1,7 @@
 // API Configuration Management
 // Switch between local development and production URLs here
 
-const IS_PRODUCTION = false; // Set to true when deploying to monsterasp.net
+const IS_PRODUCTION = true; // Set to true when deploying to monsterasp.net
 
 export const API_BASE_URL = IS_PRODUCTION 
     ? "https://goldenes.runasp.net" 
